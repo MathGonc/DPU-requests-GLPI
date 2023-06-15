@@ -1,0 +1,7 @@
+Atualização de NeoID
+
+https://suporte.dpu.def.br/citsmart/pages/smartPortal/smartPortal.load#/atividade/4/146/148
+Solicito o tecnico da unidade para atualização do programa neoid que está apresentando falhas
+config
+config
+Usuário solicitou a presença de um técnico para atualizar o programa NeoID devido a uma falha no acesso. Fora atualizado o programa e o problema foi resolvido, conforme havia sido solicitado.
