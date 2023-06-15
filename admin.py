@@ -24,9 +24,7 @@ xpathPageRequestReview = '//*[@id="service-request-view"]/div/div/div/div[1]/div
 
 def admin_login():
     cookies.loadCookie(cookies.cookieAdminFile)
-
     #config.driver.get(config.page.get('login'))
-
     config.driver.get(config.page.get('admin'));  # refresh to admin screen
     WebDriverWait(config.driver, 60).until(EC.presence_of_element_located((By.XPATH, xpathPageRequestList)))
 
