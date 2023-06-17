@@ -36,7 +36,7 @@ def admin_findRequestLoop():
         print('Chamado ' + config.request_number + ' encontrado na fila')
     else:
         print('Chamado ' + config.request_number + ' não encontrado na fila, tentando novamente...')
-        time.sleep(10)
+        time.sleep(config.looptime)
         admin_findRequestLoop()
 
 
@@ -47,7 +47,7 @@ def verifyRequestExist():
 
     else:
         print('Chamado ' + config.request_number + ' não encontrado,  tentando novamente...')
-        time.sleep(config.sleeptime)
+        time.sleep(config.looptime)
         verifyRequestExist()
 
 def verifyRequestIsAuto(requestId):
@@ -79,8 +79,8 @@ def closeRequest():
         print(str(len(requestList)) + ' requests in list')
 
         if len(requestList) == 0:
-            print('no requests in list, try again...')
-            time.sleep(config.sleeptime)
+            print('no requests in list, trying again...')
+            time.sleep(config.looptime)
             return closeRequest()
 
         for r in range(len(requestList)):

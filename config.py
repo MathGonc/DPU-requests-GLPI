@@ -11,6 +11,7 @@ page = {'login': 'https://suporte.dpu.def.br/',
         }
 
 sleeptime = 3
+looptime = 300
 
 #geral
 city = config.get('default', 'city')
