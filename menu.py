@@ -3,8 +3,6 @@ import os
 import random
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -15,7 +13,7 @@ import cookies
 
 
 def openBrowser():
-    config.driver = webdriver.Chrome()
+    config.driver = webdriver.Chrome(executable_path="chromedriver")
     config.driver.maximize_window()
 
 
@@ -49,6 +47,7 @@ def menu_options():
         + "2 - Abrir\n"
         + "3 - Fechar (automatico)\n"
         + "4 - Fechar (manual)\n"
+        + "5 - Sair\n"
     )
     if inputValue == "1":
         menu_select_user()

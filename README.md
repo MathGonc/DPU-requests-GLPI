@@ -11,6 +11,8 @@ new dpu system requests (after citsmart)
 Prerequisites:
 
 ```
+Chromedriver: https://chromedriver.chromium.org/downloads
+
 $ pip install selenium
 
 $ pip install auto-py-to-exe
