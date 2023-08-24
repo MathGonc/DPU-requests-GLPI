@@ -14,7 +14,12 @@ import random
 xpathLoadedQuestionario = '//*[@id="tb_localidadePage"]'
 
 
-def user_login():
+def OpenRequest():
+    setUserInfo()
+    setRequestInfo()
+
+
+def setUserInfo():
     cookies.loadCookie(config.userLoginName + cookies.extension)
     menu.login()
 
@@ -44,6 +49,8 @@ def user_login():
         case config.sala if 12 <= config.sala <= 20:
             config.andar = 1
 
+
+def setRequestInfo():
     # open request
     time.sleep(3)
     config.driver.get(config.request_link)

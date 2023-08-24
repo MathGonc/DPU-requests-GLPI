@@ -54,7 +54,7 @@ def menu_options():
         menu_OpenTypeRequest()
 
         openBrowser()
-        user.user_login()
+        user.OpenRequest()
         user.user_logout()
 
         admin.admin_login()
@@ -67,7 +67,7 @@ def menu_options():
         menu_OpenTypeRequest()
 
         openBrowser()
-        user.user_login()
+        user.OpenRequest()
 
     elif inputValue == "3":
         config.request_manual = 0
@@ -174,6 +174,7 @@ def menu_OpenTypeRequest():
             config.request_class_cause = request[4]
             config.request_class_solution = request[5]
             config.request_solution = request[6]
+            config.request_knowledge = request[7]
 
             if len(config.request_patrimonio) <= 1:
                 config.request_patrimonio = input(

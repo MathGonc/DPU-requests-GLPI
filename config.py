@@ -12,7 +12,7 @@ page = {
     "admin_requestid": "https://suporte.dpu.def.br/citsmart/pages/serviceRequestIncident/serviceRequestIncident.load#/request?idRequest=",
 }
 
-sleeptime = 3
+sleeptime = 1
 looptime = 300
 
 # geral
@@ -37,3 +37,4 @@ request_problem = ""
 request_class_cause = ""
 request_class_solution = ""
 request_solution = ""
+request_knowledge = ""

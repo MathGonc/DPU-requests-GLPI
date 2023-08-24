@@ -91,6 +91,7 @@ def verifyRequestIsAuto(requestId):
                 config.request_class_cause = request[4]
                 config.request_class_solution = request[5]
                 config.request_solution = request[6]
+                config.request_knowledge = request[7]
                 return 1
     return 0
 
@@ -280,6 +281,8 @@ def closeRequest():
             "Sua solicitação foi atendida! Pedimos que responda nossa pesquisa de satisfação."
         )
 
+        SetKnowledges(False)
+
         try:
             wait = WebDriverWait(config.driver, 99999)
             wait.until(
@@ -310,6 +313,8 @@ def closeRequest():
             "Sua solicitação foi atendida! Pedimos que responda nossa pesquisa de satisfação."
         )
 
+        SetKnowledges(True)
+
         config.driver.find_element(
             By.XPATH, '// *[ @ id = "request-save-submit"]'
         ).click()  # gravar e enviar
@@ -330,3 +335,49 @@ def closeRequest():
             time.sleep(config.sleeptime)
 
     print("Chamado nº " + config.request_number + " fechado")
+
+
+def SetKnowledges(auto):
+    element = config.driver.find_element(By.CLASS_NAME, "service-request-menu-toggle")
+    element.click()
+    time.sleep(config.sleeptime)
+
+    element = config.driver.find_element(By.ID, "nav-item-service-request-knowledges")
+    element.click()
+    time.sleep(config.sleeptime)
+
+    button = config.driver.find_element(
+        By.XPATH, f"//button[text()='Pesquisa de Conhecimentos']"
+    )
+    button.click()
+    time.sleep(config.sleeptime)
+
+    if auto == True:
+        if len(config.request_knowledge) == 0:
+            config.driver.execute_script(f"alert('nome do documento não encontrado');")
+            return
+
+        element = config.driver.find_element(By.ID, "lookup-input-Título")
+        element.send_keys(config.request_knowledge)
+        time.sleep(config.sleeptime)
+
+        button = config.driver.find_element(By.XPATH, f"//button[text()='Buscar']")
+        button.click()
+        time.sleep(config.sleeptime)
+
+        element = config.driver.find_elements(By.ID, "lookup-item-0")
+        if len(element) == 1:
+            element[0].click()
+            time.sleep(config.sleeptime)
+        else:
+            config.driver.execute_script(f"alert('Nenhum documento encontrado');")
+            return
+
+        ActionChains(config.driver).send_keys(Keys.ESCAPE).perform()
+        time.sleep(config.sleeptime)
+
+        element = config.driver.find_element(
+            By.CLASS_NAME, "service-request-menu-toggle"
+        )
+        element.click()
+        time.sleep(config.sleeptime)

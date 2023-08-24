@@ -5,3 +5,4 @@ Verificar diariamente todos os equipamentos de informática tais como: nobreaks,
 Outros
 Manutenção preventiva
 Foram verificados todos os equipamentos de informática tais como: nobreaks, notebooks, impressoras, computadores e periféricos nos setores: atendimento e CPD. Não foram identificadas falhas e todos os equipamentos se encontram em funcionamento. (Testes executados: ligar os equipamentos e executar tarefas básicas conforme o equipamento.)
+Script de Atendimento 01 - Atendimento Preventivo
