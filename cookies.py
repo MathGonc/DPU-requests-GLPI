@@ -1,4 +1,5 @@
 import pickle
+import time
 
 import config
 from selenium.webdriver.common.by import By
@@ -38,17 +39,21 @@ def saveCookie(custom):
 
 def loadCookie(cookieName):
     try:
-        config.driver.get(config.page.get("login"))
+        time.sleep(config.sleeptime)
+        config.driver.get(config.page.get("home"))
+
         if cookieName == cookieAdminFile:
-            cookie = pickle.load(
-                open(pathCookie + cookieAdminFile, "rb")
-            )  # loading from pickle file
+            cookie = pickle.load(open(pathCookie + cookieAdminFile, "rb"))
+            for i in cookie:
+                config.driver.add_cookie(i)
+            config.driver.get(config.page.get("admin"))
+            print("Cookies admin added")
         else:
-            cookie = pickle.load(
-                open(pathCookie + cookieName, "rb")
-            )  # loading from pickle file
-        for i in cookie:
-            config.driver.add_cookie(i)
-        print("Cookies admin added.")
+            cookie = pickle.load(open(pathCookie + cookieName, "rb"))
+            for i in cookie:
+                config.driver.add_cookie(i)
+            config.driver.get(config.page.get("userOpenRequest"))
+            print("Cookies user added")
+
     except Exception as e:
         print(e)

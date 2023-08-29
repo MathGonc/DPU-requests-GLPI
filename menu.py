@@ -40,7 +40,7 @@ def login():
     """
 
 
-def menu_options():
+def openMenu():
     inputValue = input(
         "\nSelect an option\n"
         + "1 - Abrir & Fechar\n"
@@ -49,42 +49,42 @@ def menu_options():
         + "4 - Fechar (manual)\n"
         + "5 - Sair\n"
     )
-    if inputValue == "1":
-        menu_select_user()
-        menu_OpenTypeRequest()
+    match (int(inputValue)):
+        case 1:
+            menu_select_user()
+            menu_OpenTypeRequest()
 
-        openBrowser()
-        user.OpenRequest()
-        user.user_logout()
+            openBrowser()
+            user.OpenRequest()
 
-        admin.admin_login()
-        admin.admin_findRequestLoop()
-        admin.verifyRequestExist()
-        admin.closeRequest()
+            admin.admin_login()
+            admin.admin_findRequestLoop()
+            admin.verifyRequestExist()
+            admin.closeRequest()
 
-    elif inputValue == "2":
-        menu_select_user()
-        menu_OpenTypeRequest()
+        case 2:
+            menu_select_user()
+            menu_OpenTypeRequest()
 
-        openBrowser()
-        user.OpenRequest()
+            openBrowser()
+            user.OpenRequest()
 
-    elif inputValue == "3":
-        config.request_manual = 0
-        openBrowser()
-        admin.admin_login()
-        admin.closeRequest()
+        case 3:
+            config.request_manual = 0
+            openBrowser()
+            admin.admin_login()
+            admin.closeRequest()
 
-    elif inputValue == "4":
-        config.request_manual = 1
-        config.request_number = input("\nInsert request number:\n")
-        openBrowser()
-        admin.admin_login()
-        admin.closeRequest()
+        case 4:
+            config.request_manual = 1
+            config.request_number = input("\nInsert request number:\n")
+            openBrowser()
+            admin.admin_login()
+            admin.closeRequest()
 
-    else:
-        print("no option selected, exiting...")
-        time.sleep(config.sleeptime)
+        case _:
+            print("no option selected, exiting...")
+            time.sleep(config.sleeptime)
 
 
 def menu_select_user():

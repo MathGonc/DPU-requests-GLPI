@@ -159,12 +159,18 @@ def closeRequest():
         print('chamado já capturado')
     """
 
-    # Button solution existis
     WebDriverWait(config.driver, 60).until(
-        EC.presence_of_element_located((By.XPATH, '//*[@id="radio-request-resolvida"]'))
+        EC.invisibility_of_element_located((By.CLASS_NAME, "loading-neuro"))
     )
+
+    # Button solution existis
+    element = WebDriverWait(config.driver, 60).until(
+        EC.presence_of_element_located((By.ID, "radio-request-resolvida"))
+    )
+    ActionChains(config.driver).move_to_element(element).perform()
+
     time.sleep(config.sleeptime)
-    config.driver.find_element(By.XPATH, '//*[@id="radio-request-resolvida"]').click()
+    element.click()
 
     # Nome
     nameUser = config.driver.find_element(By.XPATH, xpathNameUser).text
@@ -184,9 +190,6 @@ def closeRequest():
     if random.randint(0, 1) == 0:
         nameUser = "Sr(a) " + nameUser
 
-    WebDriverWait(config.driver, 60).until(
-        EC.invisibility_of_element_located((By.CLASS_NAME, "loading-neuro"))
-    )
     print("Field insert patrimonio loaded")
 
     # Patrimonio

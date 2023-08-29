@@ -11,17 +11,18 @@ import menu
 import cookies
 import random
 
-xpathLoadedQuestionario = '//*[@id="tb_localidadePage"]'
-
 
 def OpenRequest():
     setUserInfo()
+    setPageRequest()
     setRequestInfo()
+    userLogout()
 
 
 def setUserInfo():
-    cookies.loadCookie(config.userLoginName + cookies.extension)
     menu.login()
+    time.sleep(config.sleeptime)
+    cookies.loadCookie(config.userLoginName + cookies.extension)
 
     if config.config.has_section(config.userLoginName):
         config.sala = int(config.config.get(config.userLoginName, "sala"))
@@ -50,14 +51,19 @@ def setUserInfo():
             config.andar = 1
 
 
-def setRequestInfo():
-    # open request
-    time.sleep(3)
-    config.driver.get(config.request_link)
-    WebDriverWait(config.driver, 9999).until(
-        EC.presence_of_element_located((By.XPATH, xpathLoadedQuestionario))
-    )
+def setPageRequest():
+    time.sleep(config.sleeptime)
 
+    if config.request_manual == 0:
+        config.driver.get(config.request_link)
+
+    WebDriverWait(config.driver, 9999).until(
+        EC.presence_of_element_located((By.ID, "btn-add-servico-and-finish"))
+    )
+    time.sleep(config.sleeptime)
+
+
+def setRequestInfo():
     # IF FRAME
     # WebDriverWait(config.driver, 9999).until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, '//*[@id="questionario"]')))
     config.driver.switch_to.frame("questionario")
@@ -151,7 +157,7 @@ def setRequestInfo():
     time.sleep(config.sleeptime)
 
 
-def user_logout():
+def userLogout():
     config.driver.get(config.page.get("logout"))  # user logout
     time.sleep(config.sleeptime)
     config.driver.delete_all_cookies()
