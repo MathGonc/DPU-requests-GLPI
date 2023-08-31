@@ -5,3 +5,5 @@ Solicito o tecnico da unidade para atualização do programa adobe reader que es
 config
 config
 Usuário solicitou a presença de um técnico para atualizar o programa Adobe Reader devido a uma falha no mesmo. Fora desinstalada a versão antiga e instalada a mais atual do programa e o problema foi resolvido, conforme havia sido solicitado.
+adobe
+-

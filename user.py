@@ -12,6 +12,12 @@ import cookies
 import random
 
 
+def rateRequest():
+    setUserInfo()
+    config.driver.get(config.page.get("rate"))
+    time.sleep(9999)
+
+
 def OpenRequest():
     setUserInfo()
     setPageRequest()

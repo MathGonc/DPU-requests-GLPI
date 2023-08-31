@@ -47,7 +47,8 @@ def openMenu():
         + "2 - Abrir\n"
         + "3 - Fechar (automatico)\n"
         + "4 - Fechar (manual)\n"
-        + "5 - Sair\n"
+        + "5 - Avaliar\n"
+        + "6 - Fechar\n"
     )
     match (int(inputValue)):
         case 1:
@@ -57,10 +58,10 @@ def openMenu():
             openBrowser()
             user.OpenRequest()
 
-            admin.admin_login()
-            admin.admin_findRequestLoop()
+            admin.adminLogin()
+            admin.adminFindRequestLoop()
             admin.verifyRequestExist()
-            admin.closeRequest()
+            admin.requestClose()
 
         case 2:
             menu_select_user()
@@ -72,15 +73,22 @@ def openMenu():
         case 3:
             config.request_manual = 0
             openBrowser()
-            admin.admin_login()
-            admin.closeRequest()
+            admin.adminLogin()
+            admin.SelectRequestToClose
+            admin.requestClose()
 
         case 4:
             config.request_manual = 1
-            config.request_number = input("\nInsert request number:\n")
             openBrowser()
-            admin.admin_login()
-            admin.closeRequest()
+            admin.adminLogin()
+            admin.SelectRequestToClose
+            admin.requestClose()
+
+        case 5:
+            config.request_manual = 1
+            menu_select_user()
+            openBrowser()
+            user.rateRequest()
 
         case _:
             print("no option selected, exiting...")
@@ -174,7 +182,8 @@ def menu_OpenTypeRequest():
             config.request_class_cause = request[4]
             config.request_class_solution = request[5]
             config.request_solution = request[6]
-            config.request_knowledge = request[7]
+            if len(request[7]) <= 1:
+                config.request_knowledge = request[7]
 
             if len(config.request_patrimonio) <= 1:
                 config.request_patrimonio = input(
