@@ -1,0 +1,75 @@
+<p><strong><img alt="" src="https://centralit.com.br/wp-content/uploads/2022/02/logotipo-e1645043197751.png" style="border-style:solid; border-width:0px; float:right; height:50px; margin:8px 5px; width:174px" /></strong><strong><img alt="" src="https://www.dpu.def.br/images/home-2021/Logo_Preferencial_SEMFUNDO_PRETA.png" style="border-style:solid; border-width:0px; float:left; height:50px; margin:8px 5px; width:130px" /></strong></p>
+
+<div style="background-color:#dbe5f1; border-color:black; border-radius:0.5; border-style:solid; padding:20px">
+<div style="text-align:center"><span style="font-size:16px"><strong>PROCEDIMENTO OPERACIONAL</strong></span></div>
+</div>
+
+<div style="display:flex; width:100%">
+<div style="background-color:#dbe5f1; border-color:black; border-radius:0.5; border-style:solid; border-top:0; float:left; padding:5px; width:25%">
+<div style="text-align:center"><strong>CATEGORIA</strong></div>
+</div>
+
+<div style="border-color:black; border-left:0; border-radius:0.5; border-style:solid; border-top:0; padding:5px; width:75%">&nbsp;</div>
+</div>
+
+<div style="display:flex; width:100%">
+<div style="background-color:#dbe5f1; border-color:black; border-style:solid; border-top:0; bottom:0; float:left; padding:5px; top:0; width:25%">
+<div style="text-align:center"><strong>NOME DO ARQUIVO</strong></div>
+</div>
+
+<div style="border-color:black; border-left:0; border-radius:0.5; border-style:solid; border-top:0; padding:5px; width:75%">&nbsp;</div>
+</div>
+
+<div style="display:flex; width:100%">
+<div style="background-color:#dbe5f1; border-color:black; border-style:solid; border-top:0; bottom:0; float:left; padding:5px; top:0; width:20%">
+<div style="text-align:center"><strong>VALIDADE</strong></div>
+</div>
+
+<div style="border-color:black; border-left:0; border-radius:0.5; border-style:solid; border-top:0; padding:5px; width:10%">1 Ano</div>
+
+<div style="background-color:#dbe5f1; border-color:black; border-left:0; border-radius:0.5; border-style:solid; border-top:0; padding:5px; text-align:center; width:25%"><strong>AUTOR</strong></div>
+
+<div style="border-color:black; border-left:0; border-radius:0.5; border-style:solid; border-top:0; padding:5px; width:40%">&nbsp;</div>
+
+<div style="background-color:#dbe5f1; border-color:black; border-left:0; border-radius:0.5; border-style:solid; border-top:0; padding:5px; text-align:center; width:25%"><strong>APROVADOR/REVISOR</strong></div>
+
+<div style="border-color:black; border-left:0; border-radius:0.5; border-style:solid; border-top:0; padding:5px; width:40%">&nbsp;</div>
+</div>
+
+<div style="border-bottom-color:black; border-bottom-style:solid; border-left-color:black; border-left-style:solid; border-right-color:black; border-right-style:solid; border-top:0px; font-family:Arial,Helvetica,sans-serif; padding:5px; text-align:justify">
+<p><span style="color:#000000"><strong>1.&nbsp;&nbsp; &nbsp;OBJETIVO</strong></span></p>
+
+<p>&nbsp;</p>
+
+<p><span style="color:#000000"><strong>2.&nbsp;&nbsp; &nbsp;CAUSA</strong></span></p>
+
+<p>&nbsp;</p>
+
+<p><span style="color:#000000"><strong>3.&nbsp;&nbsp; &nbsp;PROCEDIMENTO&nbsp;</strong></span></p>
+
+<p><span style="color:#000000"><strong>1&deg; Passo:</strong></span></p>
+
+<p style="text-align:left"><span style="color:#000000"><strong>2&ordm; Passo:&nbsp;</strong></span></p>
+
+<p><span style="color:#000000"><strong>3&ordm; Passo:</strong>&nbsp;</span></p>
+
+<p style="text-align:left"><span style="color:#000000"><strong>4&ordm; Passo:&nbsp;</strong></span></p>
+
+<p style="text-align:left"><span style="color:#000000"><strong>5&deg; Passo:&nbsp;</strong></span></p>
+
+<p style="text-align:left"><span style="color:#000000"><strong>6&deg; Passo:&nbsp;</strong></span></p>
+
+<p style="text-align:center"><strong>FIM DO PROCEDIMENTO</strong></p>
+
+<p style="text-align:left"><span style="color:#000000">-------------------------------------------------------------------------------------------------------</span></p>
+
+<p><strong>SCRIPT DE PREENCHIMENTO NO CAMPO SOLU&Ccedil;&Atilde;O RESPOSTA:</strong></p>
+
+<p><strong>Usu&aacute;rio: </strong>(Necess&aacute;rio somente se o usu&aacute;rio atendido for diferente do solicitante). Sua solicita&ccedil;&atilde;o foi atendida conforme solicitado.<br />
+<strong>A&ccedil;&otilde;es realizadas:</strong> N/A<br />
+<strong>Patrim&ocirc;nio:</strong> N/A (Quando tiver)<br />
+<strong>Testes executados:</strong> N/A<br />
+<strong>Evid&ecirc;ncia: </strong>Em anexo &quot;Sempre que poss&iacute;vel, incluir imagens evidenciando a solu&ccedil;&atilde;o do chamado&quot;.&nbsp;</p>
+
+<p><strong>A sua opini&atilde;o &eacute; muito importante, pedimos que responda nossa pesquisa de satisfa&ccedil;&atilde;o.</strong></p>
+</div>
