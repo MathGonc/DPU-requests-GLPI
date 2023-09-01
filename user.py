@@ -8,6 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import config
 import menu
+import utils
 import cookies
 import random
 
@@ -16,6 +17,26 @@ def rateRequest():
     login()
     setUserInfo()
     config.driver.get(config.page.get("rate"))
+
+    element = WebDriverWait(config.driver, 9999).until(
+        EC.presence_of_element_located((By.ID, "idStatusMinhasSolicitacoes"))
+    )
+    time.sleep(config.sleeptime)
+    element.click()
+    element.send_keys("Todos" + Keys.ENTER)
+    time.sleep(config.sleeptime)
+
+    button = config.driver.find_element(
+        By.CSS_SELECTOR,
+        f"#formMinhasSolicitacoes > div.row > div > div.col-md-1 > button",
+    )
+    time.sleep(config.sleeptime)
+    button.click()
+    time.sleep(config.sleeptime)
+
+    element = config.driver.find_elements(By.XPATH, f"//i[text()='thumbs_up_down']")
+    utils.alert(f"{len(element)} chamados a serem avaliados")
+
     time.sleep(9999)
 
 

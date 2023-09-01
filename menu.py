@@ -118,15 +118,6 @@ def menu_OpenTypeRequest():
 
     inputValue = input(requestList)
     inputValue = int(inputValue)
-    # case 0:
-    #     config.request_manual = 1
-    #     match (random.randint(0, 3)):
-    #         case 0:
-    #             config.request_link = "https://suporte.dpu.def.br/citsmart/pages/smartPortal/smartPortal.load#/atividade/4/146/151"
-    #         case 1:
-    #             config.request_link = "https://suporte.dpu.def.br/citsmart/pages/smartPortal/smartPortal.load#/atividade/4/146/152"
-    #         case 2:
-    #             config.request_link = "https://suporte.dpu.def.br/citsmart/pages/smartPortal/smartPortal.load#/atividade/4/153/161"
     if 1 <= inputValue <= count:
         section = configRequest.sections()[inputValue - 1]
         print("\nTipo de chamado:", section)

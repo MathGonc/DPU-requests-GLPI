@@ -63,44 +63,32 @@ def verifyRequestExist():
 
 def compareRequestTextWithFile(requestId, requestText):
     print(f"Comparando descrição do chamado nº {requestId}")
+    time.sleep(config.sleeptime)
 
     configRequest = ConfigParser()
     with open("requests.ini", "r", encoding="utf-8") as file:
         configRequest.read_file(file)
-
-    count = 0
     sections = list(configRequest.keys())
     for section in sections:
-        count += 1
-        actualSection = configRequest.sections()[count]
-
-        if requestText in configRequest.get(actualSection, "request_problem"):
-            print(requestText)
+        if requestText in configRequest.get(section, "request_problem"):
             config.request_number = requestId
 
-            config.request_patrimonio = configRequest.get(
-                actualSection, "request_patrimonio"
-            )
-            config.request_link = configRequest.get(actualSection, "request_link")
-            config.request_problem = configRequest.get(actualSection, "request_problem")
+            config.request_patrimonio = configRequest.get(section, "request_patrimonio")
+            config.request_link = configRequest.get(section, "request_link")
+            config.request_problem = configRequest.get(section, "request_problem")
             config.request_class_cause = configRequest.get(
-                actualSection, "request_class_cause"
+                section, "request_class_cause"
             )
             config.request_class_solution = configRequest.get(
-                actualSection, "request_class_solution"
+                section, "request_class_solution"
             )
-            config.request_solution = configRequest.get(
-                actualSection, "request_solution"
-            )
-            config.request_knowledge = configRequest.get(
-                actualSection, "request_knowledge"
-            )
+            config.request_solution = configRequest.get(section, "request_solution")
+            config.request_knowledge = configRequest.get(section, "request_knowledge")
             return 1
     return 0
 
 
 def SelectRequestToClose():
-    print("192381298319283")
     print(config.request_manual)
     if config.request_manual == 0:
         time.sleep(config.sleeptime)
@@ -242,23 +230,74 @@ def setTextSolution():
         )
 
 
-def requestClose():
-    """
-    # capture request and confirm
-    if len(config.driver.find_elements(By.XPATH,xpathRequestCaptureTicket)) > 0:
+def requestCapture():
+    element = config.driver.find_elements(By.XPATH, f"//*[text()='Capturar ticket']")
+    if element:
+        ActionChains(config.driver).move_to_element(element[0]).perform()
         time.sleep(config.sleeptime)
-        config.driver.find_element(By.XPATH,xpathRequestCaptureTicket).click()
+        element[0].click()
 
-        WebDriverWait(config.driver, 60).until(EC.presence_of_element_located((By.XPATH, '/html/body/div[1]/div/div/div[3]/button[1]')))
-        if len(config.driver.find_elements(By.XPATH, '/html/body/div[1]/div/div/div[3]/button[1]')) > 0:
-            config.driver.find_element(By.XPATH, '/html/body/div[1]/div/div/div[3]/button[1]').click()
-    else:
-        print('chamado já capturado')
-    """
+        element = WebDriverWait(config.driver, 9999).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, f"button.btn.btn-sm.btn-v3-citsmart.ng-binding")
+            )
+        )
+        element.click()
+        time.sleep(config.sleeptime)
 
+
+def SetKnowledges(auto):
+    element = config.driver.find_element(By.CLASS_NAME, "service-request-menu-toggle")
+    element.click()
+    time.sleep(config.sleeptime)
+
+    element = config.driver.find_element(By.ID, "nav-item-service-request-knowledges")
+    element.click()
+    time.sleep(config.sleeptime)
+
+    button = config.driver.find_element(
+        By.XPATH, f"//button[text()='Pesquisa de Conhecimentos']"
+    )
+    button.click()
+    time.sleep(config.sleeptime)
+
+    if len(config.request_knowledge) <= 1:
+        utils.alert(f"nome do documento não encontrado")
+        return
+
+    if auto == True:
+        element = config.driver.find_element(By.ID, "lookup-input-Título")
+        element.send_keys(config.request_knowledge)
+        time.sleep(config.sleeptime)
+
+        button = config.driver.find_element(By.XPATH, f"//button[text()='Buscar']")
+        button.click()
+        time.sleep(config.sleeptime)
+
+        element = config.driver.find_elements(By.ID, "lookup-item-0")
+        if len(element) == 1:
+            element[0].click()
+            time.sleep(config.sleeptime)
+        else:
+            config.driver.execute_script(f"alert('Nenhum documento encontrado');")
+            return
+
+        ActionChains(config.driver).send_keys(Keys.ESCAPE).perform()
+        time.sleep(config.sleeptime)
+
+        element = config.driver.find_element(
+            By.CLASS_NAME, "service-request-menu-toggle"
+        )
+        element.click()
+        time.sleep(config.sleeptime)
+
+
+def requestClose():
     WebDriverWait(config.driver, 9999).until(
         EC.invisibility_of_element_located((By.CLASS_NAME, "loading-neuro"))
     )
+
+    requestCapture()
 
     # Button solution existis
     element = WebDriverWait(config.driver, 9999).until(
@@ -321,93 +360,28 @@ def requestClose():
         '//*[@id="service-request-view"]/div/div/div/div[2]/div/div/div[3]/div[2]/div[1]/div/fieldset/div[2]/div/div/div',
     )
     requestText = elementDescription[0].get_property("innerText")
+    requestText = requestText.replace("\n", "")
+    print(requestText)
     compareRequestTextWithFile(requestNumber, requestText)
     setTextSolution()
 
-    # Manual
-    if config.request_manual == 1:
+    if config.request_manual == 1:  # Manual
         SetKnowledges(False)
 
-        try:
-            wait = WebDriverWait(config.driver, 99999)
-            wait.until(
-                EC.presence_of_element_located(
-                    (
-                        By.XPATH,
-                        '//*[@id="service-request-incident-container"]/div[1]/div[1]',
-                    )
-                )
-            )  # tickets list
-        finally:
-            time.sleep(config.sleeptime)
-
-    # Automatico
-    else:
+    else:  # Automatico
         SetKnowledges(True)
-
-        config.driver.find_element(
-            By.XPATH, '// *[ @ id = "request-save-submit"]'
-        ).click()  # gravar e enviar
-        time.sleep(config.sleeptime)
-
-        # capture request and confirm
-        if (
-            len(
-                config.driver.find_elements(
-                    By.XPATH, "/html/body/div[1]/div/div/div[3]/button[1]"
-                )
-            )
-            > 0
-        ):
-            config.driver.find_element(
-                By.XPATH, "/html/body/div[1]/div/div/div[3]/button[1]"
-            ).click()
-            time.sleep(config.sleeptime)
-
-    print("Chamado nº " + config.request_number + " fechado")
-
-
-def SetKnowledges(auto):
-    element = config.driver.find_element(By.CLASS_NAME, "service-request-menu-toggle")
-    element.click()
-    time.sleep(config.sleeptime)
-
-    element = config.driver.find_element(By.ID, "nav-item-service-request-knowledges")
-    element.click()
-    time.sleep(config.sleeptime)
-
-    button = config.driver.find_element(
-        By.XPATH, f"//button[text()='Pesquisa de Conhecimentos']"
-    )
-    button.click()
-    time.sleep(config.sleeptime)
-
-    if len(config.request_knowledge) <= 1:
-        utils.alert(f"nome do documento não encontrado")
-        return
-
-    if auto == True:
-        element = config.driver.find_element(By.ID, "lookup-input-Título")
-        element.send_keys(config.request_knowledge)
-        time.sleep(config.sleeptime)
-
-        button = config.driver.find_element(By.XPATH, f"//button[text()='Buscar']")
-        button.click()
-        time.sleep(config.sleeptime)
-
-        element = config.driver.find_elements(By.ID, "lookup-item-0")
-        if len(element) == 1:
-            element[0].click()
-            time.sleep(config.sleeptime)
-        else:
-            config.driver.execute_script(f"alert('Nenhum documento encontrado');")
-            return
-
-        ActionChains(config.driver).send_keys(Keys.ESCAPE).perform()
-        time.sleep(config.sleeptime)
-
         element = config.driver.find_element(
-            By.CLASS_NAME, "service-request-menu-toggle"
+            By.XPATH, '// *[ @ id = "request-save-submit"]'
         )
         element.click()
-        time.sleep(config.sleeptime)
+
+    WebDriverWait(config.driver, 9999).until(
+        EC.invisibility_of_element_located(
+            (
+                By.XPATH,
+                '// *[ @ id = "request-save-submit"]',
+            )
+        )
+    )
+    time.sleep(config.sleeptime)
+    print("Chamado nº " + config.request_number + " fechado")
