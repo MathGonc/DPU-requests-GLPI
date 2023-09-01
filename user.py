@@ -13,20 +13,37 @@ import random
 
 
 def rateRequest():
+    login()
     setUserInfo()
     config.driver.get(config.page.get("rate"))
     time.sleep(9999)
 
 
 def OpenRequest():
+    login()
     setUserInfo()
     setPageRequest()
     setRequestInfo()
     userLogout()
 
 
+def login():
+    config.driver.get(config.page.get("login"))
+
+    if len(config.userLoginName) == 0:
+        WebDriverWait(config.driver, 9999).until(
+            EC.presence_of_element_located(
+                (By.XPATH, "/html/body/nav/div/div[1]/a/img")
+            )
+        )  # logo dpu
+
+        nameUser = config.driver.find_element(
+            By.XPATH, '// *[ @ id = "navbar"] / ul / li[4] / a / span[1]'
+        ).text
+        cookies.saveCookie(nameUser.split()[0])
+
+
 def setUserInfo():
-    menu.login()
     time.sleep(config.sleeptime)
     cookies.loadCookie(config.userLoginName + cookies.extension)
 

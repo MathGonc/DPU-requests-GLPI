@@ -1,5 +1,7 @@
 import random
 import os
+from configparser import ConfigParser
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
@@ -28,9 +30,7 @@ xpathPageRequestReview = '//*[@id="service-request-view"]/div/div/div/div[1]/div
 
 def adminLogin():
     cookies.loadCookie(cookies.cookieAdminFile)
-    # config.driver.get(config.page.get('login'))
     config.driver.get(config.page.get("admin"))
-    # refresh to admin screen
     WebDriverWait(config.driver, 60).until(
         EC.presence_of_element_located((By.XPATH, xpathPageRequestList))
     )
@@ -41,12 +41,10 @@ def adminFindRequestLoop():
 
     requestItem = "list-item-" + config.request_number
     if len(config.driver.find_elements(By.ID, requestItem)) > 0:
-        print("Chamado " + config.request_number + " encontrado na fila")
+        print(f"Chamado {config.request_number} encontrado na fila")
     else:
         print(
-            "Chamado "
-            + config.request_number
-            + " não encontrado na fila, tentando novamente..."
+            f"Chamado {config.request_number} não encontrado na fila, tentando novamente..."
         )
         time.sleep(config.looptime)
         adminFindRequestLoop()
@@ -55,62 +53,54 @@ def adminFindRequestLoop():
 def verifyRequestExist():
     requestItem = "list-item-" + str(config.request_number)
     if len(config.driver.find_elements(By.ID, requestItem)) > 0:
-        print("Chamado " + config.request_number + " encontrado")
+        print(f"Chamado {config.request_number} encontrado")
 
     else:
-        print(
-            "Chamado "
-            + config.request_number
-            + " não encontrado,  tentando novamente..."
-        )
+        print(f"Chamado {config.request_number} não encontrado, tentando novamente...")
         time.sleep(config.looptime)
         verifyRequestExist()
 
 
-def verifyDefaultTextExist(requestId):
-    print("Verificando chamado nº" + requestId)
+def compareRequestTextWithFile(requestId, requestText):
+    print(f"Comparando descrição do chamado nº {requestId}")
+
+    configRequest = ConfigParser()
+    with open("requests.ini", "r", encoding="utf-8") as file:
+        configRequest.read_file(file)
+
     count = 0
-    for path in os.listdir(config.request_path):
-        if os.path.isfile(os.path.join(config.request_path, path)):
-            count += 1
-            file = open(
-                config.request_path + "/" + str(count) + ".txt",
-                mode="r",
-                encoding="utf-8",
+    sections = list(configRequest.keys())
+    for section in sections:
+        count += 1
+        actualSection = configRequest.sections()[count]
+
+        if requestText in configRequest.get(actualSection, "request_problem"):
+            print(requestText)
+            config.request_number = requestId
+
+            config.request_patrimonio = configRequest.get(
+                actualSection, "request_patrimonio"
             )
-            request = file.readlines()
-
-            requestText = ""
-            elementDescription = config.driver.find_elements(
-                By.ID, f"list-item-{requestId}"
+            config.request_link = configRequest.get(actualSection, "request_link")
+            config.request_problem = configRequest.get(actualSection, "request_problem")
+            config.request_class_cause = configRequest.get(
+                actualSection, "request_class_cause"
             )
-            if len(elementDescription):
-                child_element = elementDescription[0].find_element(
-                    By.CLASS_NAME, "tableless-td ellipsis descricao ng-binding ng-hide"
-                )
-                requestText = child_element.get_property("innerText")
-                requestText[0] = requestText[0].replace(
-                    "...", ""
-                )  # replace ... in final text
-            else:
-                elementDescription = config.driver.find_elements(
-                    By.XPATH,
-                    '//*[@id="service-request-view"]/div/div/div/div[2]/div/div/div[3]/div[2]/div[1]/div/fieldset/div[2]/div/div/div',
-                )
-                requestText = elementDescription[0].get_property("innerText")
-
-            if requestText in request[3]:  # line 4
-                print(requestText)
-                config.request_problem = request[3]
-                config.request_class_cause = request[4]
-                config.request_class_solution = request[5]
-                config.request_solution = request[6]
-                config.request_knowledge = request[7]
-
-                config.request_number = requestId
+            config.request_class_solution = configRequest.get(
+                actualSection, "request_class_solution"
+            )
+            config.request_solution = configRequest.get(
+                actualSection, "request_solution"
+            )
+            config.request_knowledge = configRequest.get(
+                actualSection, "request_knowledge"
+            )
+            return 1
+    return 0
 
 
 def SelectRequestToClose():
+    print("192381298319283")
     print(config.request_manual)
     if config.request_manual == 0:
         time.sleep(config.sleeptime)
@@ -128,8 +118,16 @@ def SelectRequestToClose():
         for r in range(len(requestList)):
             requestNumber = requestList[r].get_property("innerText")
             print(requestNumber)
-            verifyDefaultTextExist(requestNumber)
-            if config.request_number:
+
+            elementDescription = config.driver.find_elements(
+                By.CSS_SELECTOR,
+                f"#list-item-{requestNumber} > div.tableless-td.ellipsis.descricao.ng-binding.ng-hide",
+            )
+            requestText = elementDescription[0].get_property("innerText")
+            requestText = requestText.replace("...", "")
+
+            foundText = compareRequestTextWithFile(requestNumber, requestText)
+            if foundText:
                 print(f"request [{requestNumber}] is automated")
                 break
             else:
@@ -318,7 +316,12 @@ def requestClose():
         '//*[@id="service-request-view"]/div/div/div/div[1]/div/ul/li[1]/div[1]/div[2]/div[2]',
     )
     requestNumber = elementRequestNumber.get_property("innerText")
-    verifyDefaultTextExist(requestNumber)
+    elementDescription = config.driver.find_elements(
+        By.XPATH,
+        '//*[@id="service-request-view"]/div/div/div/div[2]/div/div/div[3]/div[2]/div[1]/div/fieldset/div[2]/div/div/div',
+    )
+    requestText = elementDescription[0].get_property("innerText")
+    compareRequestTextWithFile(requestNumber, requestText)
     setTextSolution()
 
     # Manual
