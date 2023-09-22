@@ -54,11 +54,13 @@ def verifyRequestExist():
     requestItem = "list-item-" + str(config.request_number)
     if len(config.driver.find_elements(By.ID, requestItem)) > 0:
         print(f"Chamado {config.request_number} encontrado")
+        return 1
 
     else:
         print(f"Chamado {config.request_number} não encontrado, tentando novamente...")
         time.sleep(config.looptime)
         verifyRequestExist()
+        return 0
 
 
 def compareRequestTextWithFile(requestId, requestText):
@@ -135,16 +137,6 @@ def SelectRequestToClose():
         WebDriverWait(config.driver, 60).until(
             EC.presence_of_element_located((By.XPATH, xpathPageRequestReview))
         )
-
-        # Suspend?
-        if len(config.driver.find_elements(By.XPATH, xpathReactive)) > 0:
-            config.driver.find_element(By.XPATH, xpathReactive).click()
-            WebDriverWait(config.driver, 60).until(
-                EC.presence_of_element_located((By.XPATH, xpathPageRequestList))
-            )
-            config.driver.get(
-                config.page.get("admin_requestid") + config.request_number
-            )
 
 
 def setTextSolution():
@@ -233,6 +225,8 @@ def setTextSolution():
 def requestCapture():
     element = config.driver.find_elements(By.XPATH, f"//*[text()='Capturar ticket']")
     if element:
+        waitPageBlockElement()
+
         ActionChains(config.driver).move_to_element(element[0]).perform()
         time.sleep(config.sleeptime)
         element[0].click()
@@ -262,7 +256,7 @@ def SetKnowledges(auto):
     time.sleep(config.sleeptime)
 
     if len(config.request_knowledge) <= 1:
-        utils.alert(f"nome do documento não encontrado")
+        utils.alert(f"Modo manual - nome do documento não encontrado automaticamente")
         return
 
     if auto == True:
@@ -293,9 +287,15 @@ def SetKnowledges(auto):
 
 
 def requestClose():
-    WebDriverWait(config.driver, 9999).until(
-        EC.invisibility_of_element_located((By.CLASS_NAME, "loading-neuro"))
-    )
+    waitPageBlockElement()
+
+    # Suspend?
+    if len(config.driver.find_elements(By.XPATH, xpathReactive)) > 0:
+        config.driver.find_element(By.XPATH, xpathReactive).click()
+        WebDriverWait(config.driver, 60).until(
+            EC.presence_of_element_located((By.XPATH, xpathPageRequestList))
+        )
+        config.driver.get(config.page.get("admin_requestid") + config.request_number)
 
     requestCapture()
 
@@ -304,6 +304,11 @@ def requestClose():
         EC.presence_of_element_located((By.ID, "radio-request-resolvida"))
     )
     ActionChains(config.driver).move_to_element(element).perform()
+
+    WebDriverWait(config.driver, 9999).until(
+        EC.invisibility_of_element_located((By.XPATH, "//div[@class='modal fade']"))
+    )
+
     time.sleep(config.sleeptime)
     element.click()
 
@@ -344,6 +349,7 @@ def requestClose():
     config.driver.find_element(
         By.XPATH, '//*[@id="solution-category"]/div[1]/span/span[2]'
     ).click()
+
     config.driver.find_element(
         By.XPATH, '//*[@id="solution-category"]/input[1]'
     ).send_keys(config.request_class_solution)
@@ -385,3 +391,17 @@ def requestClose():
     )
     time.sleep(config.sleeptime)
     print("Chamado nº " + config.request_number + " fechado")
+
+
+def waitPageBlockElement():
+    WebDriverWait(config.driver, 9999).until(
+        EC.invisibility_of_element_located((By.CLASS_NAME, "loading-neuro"))
+    )
+
+    WebDriverWait(config.driver, 9999).until(
+        EC.invisibility_of_element_located(
+            (By.ID, "divBloqueiaTela_JANELA_AGUARDE_MENU")
+        )
+    )
+
+    return

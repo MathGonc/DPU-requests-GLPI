@@ -38,6 +38,7 @@ def openMenu():
             admin.adminLogin()
             admin.adminFindRequestLoop()
             admin.verifyRequestExist()
+            admin.SelectRequestToClose()
             admin.requestClose()
 
         case 2:
@@ -113,6 +114,8 @@ def menu_OpenTypeRequest():
     count = 1
     sections = list(configRequest.keys())
     for section in sections:
+        if section == "DEFAULT":
+            continue
         requestList += f"{count} - {section}\n"
         count += 1
 
@@ -136,5 +139,7 @@ def menu_OpenTypeRequest():
             config.request_patrimonio = input(
                 "Este tipo de chamado exige um patrimonio: "
             )
+    elif inputValue == 0:
+        return
     else:
         print("Opção inválida")

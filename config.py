@@ -14,10 +14,11 @@ page = {
     "rate": "https://suporte.dpu.def.br/citsmart/pages/smartPortal/smartPortal.load#/my-requests",
 }
 
-sleeptime = 1
+sleeptime = 3
 looptime = 300
 
 # geral
+needMedia = config.get("default", "needMedia")
 city = config.get("default", "city")
 
 # user
