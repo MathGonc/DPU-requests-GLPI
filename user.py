@@ -66,7 +66,9 @@ def login():
 
 def setUserInfo():
     time.sleep(config.sleeptime)
-    cookies.loadCookie(config.userLoginName + cookies.extension)
+
+    if len(config.userLoginName) > 0:
+        cookies.loadCookie(config.userLoginName + cookies.extension)
 
     if config.config.has_section(config.userLoginName):
         config.sala = int(config.config.get(config.userLoginName, "sala"))
@@ -90,7 +92,18 @@ def setUserInfo():
 
     match config.sala:
         case config.sala if 0 <= config.sala <= 11:
-            config.andar = "terreo"
+            match random.randint(0, 4):
+                case 0:
+                    config.andar = "terreo"
+                case 1:
+                    config.andar = "Térreo"
+                case 2:
+                    config.andar = "Terrestre"
+                case 3:
+                    config.andar = "Primeiro piso"
+                case 4:
+                    config.andar = "0"
+
         case config.sala if 12 <= config.sala <= 20:
             config.andar = 1
 
@@ -109,6 +122,8 @@ def setPageRequest():
 
 
 def setRequestInfo():
+    utils.waitPageBlockElement()
+
     # IF FRAME
     # WebDriverWait(config.driver, 9999).until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, '//*[@id="questionario"]')))
     config.driver.switch_to.frame("questionario")
@@ -172,13 +187,14 @@ def setRequestInfo():
         field[0].send_keys(config.request_problem)
 
     if config.request_manual == 0:
-        # confirm
-        field = config.driver.find_elements(
-            By.XPATH, '//*[@id="btn-add-servico-and-finish"]'
-        )
-        if field:
-            field[0].click()
-        time.sleep(15)
+        if config.waitConfirmOpen == 0:
+            # confirm
+            field = config.driver.find_elements(
+                By.XPATH, '//*[@id="btn-add-servico-and-finish"]'
+            )
+            if field:
+                field[0].click()
+            time.sleep(15)
 
     # get request number
     try:

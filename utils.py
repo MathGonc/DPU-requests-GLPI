@@ -29,3 +29,17 @@ def alert(string, delay=5):
             # alert.dismiss()
     except Exception as e:
         print("Erro:", e)
+
+
+def waitPageBlockElement():
+    WebDriverWait(config.driver, 9999).until(
+        EC.invisibility_of_element_located((By.CLASS_NAME, "loading-neuro"))
+    )
+
+    WebDriverWait(config.driver, 9999).until(
+        EC.invisibility_of_element_located(
+            (By.ID, "divBloqueiaTela_JANELA_AGUARDE_MENU")
+        )
+    )
+
+    return

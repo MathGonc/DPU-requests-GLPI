@@ -14,11 +14,17 @@ page = {
     "rate": "https://suporte.dpu.def.br/citsmart/pages/smartPortal/smartPortal.load#/my-requests",
 }
 
-sleeptime = 3
+sleeptime = 1
 looptime = 300
 
 # geral
 needMedia = config.get("default", "needMedia")
+waitConfirmOpen = config.get("default", "waitConfirmOpen")
+waitConfirmClose = config.get("default", "waitConfirmClose")
+defaultOption = int(config.get("default", "defaultOption"))
+defaultUser = int(config.get("default", "defaultUser"))
+defaultRequest = int(config.get("default", "defaultRequest"))
+defaultPatrimonio = config.get("default", "defaultPatrimonio")
 city = config.get("default", "city")
 
 # user

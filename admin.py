@@ -225,7 +225,7 @@ def setTextSolution():
 def requestCapture():
     element = config.driver.find_elements(By.XPATH, f"//*[text()='Capturar ticket']")
     if element:
-        waitPageBlockElement()
+        utils.waitPageBlockElement()
 
         ActionChains(config.driver).move_to_element(element[0]).perform()
         time.sleep(config.sleeptime)
@@ -249,6 +249,15 @@ def SetKnowledges(auto):
     element.click()
     time.sleep(config.sleeptime)
 
+    elementText = config.driver.find_elements(
+        By.XPATH, f"//*[text()='Nenhum registro encontrado!']"
+    )
+    if len(elementText) == 0:
+        utils.alert(f"Documento já anexado")
+        ActionChains(config.driver).send_keys(Keys.ESCAPE).perform()
+        time.sleep(config.sleeptime)
+        return
+
     button = config.driver.find_element(
         By.XPATH, f"//button[text()='Pesquisa de Conhecimentos']"
     )
@@ -269,11 +278,13 @@ def SetKnowledges(auto):
         time.sleep(config.sleeptime)
 
         element = config.driver.find_elements(By.ID, "lookup-item-0")
-        if len(element) == 1:
+        if len(element) >= 1:
             element[0].click()
             time.sleep(config.sleeptime)
+            print("231232132132132")
         else:
-            config.driver.execute_script(f"alert('Nenhum documento encontrado');")
+            utils.alert("Nenhum documento encontrado")
+            print("999999999999999999999999999999999")
             return
 
         ActionChains(config.driver).send_keys(Keys.ESCAPE).perform()
@@ -287,7 +298,7 @@ def SetKnowledges(auto):
 
 
 def requestClose():
-    waitPageBlockElement()
+    utils.waitPageBlockElement()
 
     # Suspend?
     if len(config.driver.find_elements(By.XPATH, xpathReactive)) > 0:
@@ -319,7 +330,7 @@ def requestClose():
         "Outros",
         "Software",
         "Erro de aplicação",
-        "Erro de configuação",
+        "Erro de configuração",
     ]
     config.request_class_cause = listClassCause[
         random.randint(0, (len(listClassCause) - 1))
@@ -376,10 +387,16 @@ def requestClose():
 
     else:  # Automatico
         SetKnowledges(True)
-        element = config.driver.find_element(
-            By.XPATH, '// *[ @ id = "request-save-submit"]'
-        )
-        element.click()
+        if config.waitConfirmClose == 0:
+            element = config.driver.find_element(
+                By.XPATH, '// *[ @ id = "request-save-submit"]'
+            )
+            WebDriverWait(config.driver, 9999).until(
+                EC.invisibility_of_element_located(
+                    (By.XPATH, "//div[@class='modal fade']")
+                )
+            )
+            element.click()
 
     WebDriverWait(config.driver, 9999).until(
         EC.invisibility_of_element_located(
@@ -391,17 +408,3 @@ def requestClose():
     )
     time.sleep(config.sleeptime)
     print("Chamado nº " + config.request_number + " fechado")
-
-
-def waitPageBlockElement():
-    WebDriverWait(config.driver, 9999).until(
-        EC.invisibility_of_element_located((By.CLASS_NAME, "loading-neuro"))
-    )
-
-    WebDriverWait(config.driver, 9999).until(
-        EC.invisibility_of_element_located(
-            (By.ID, "divBloqueiaTela_JANELA_AGUARDE_MENU")
-        )
-    )
-
-    return

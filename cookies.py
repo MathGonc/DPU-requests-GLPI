@@ -40,7 +40,7 @@ def saveCookie(custom):
 def loadCookie(cookieName):
     try:
         time.sleep(config.sleeptime)
-        config.driver.get(config.page.get("home"))
+        # config.driver.get(config.page.get("home"))
 
         if cookieName == cookieAdminFile:
             cookie = pickle.load(open(pathCookie + cookieAdminFile, "rb"))
@@ -52,7 +52,7 @@ def loadCookie(cookieName):
             cookie = pickle.load(open(pathCookie + cookieName, "rb"))
             for i in cookie:
                 config.driver.add_cookie(i)
-            config.driver.get(config.page.get("userOpenRequest"))
+            # config.driver.get(config.page.get("userOpenRequest"))
             print("Cookies user added")
 
     except Exception as e:

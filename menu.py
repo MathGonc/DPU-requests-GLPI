@@ -18,15 +18,19 @@ def openBrowser():
 
 
 def openMenu():
-    inputValue = input(
-        "\nSelect an option\n"
-        + "1 - Abrir & Fechar\n"
-        + "2 - Abrir\n"
-        + "3 - Fechar (automatico)\n"
-        + "4 - Fechar (manual)\n"
-        + "5 - Avaliar\n"
-        + "6 - Fechar\n"
-    )
+    if config.defaultOption == 0:
+        inputValue = input(
+            "\nSelect an option\n"
+            + "1 - Abrir & Fechar\n"
+            + "2 - Abrir\n"
+            + "3 - Fechar (automatico)\n"
+            + "4 - Fechar (manual)\n"
+            + "5 - Avaliar\n"
+            + "6 - Fechar\n"
+        )
+    else:
+        inputValue = config.defaultOption
+
     match (int(inputValue)):
         case 1:
             menu_select_user()
@@ -86,7 +90,10 @@ def menu_select_user():
                 )
                 count += 1
 
-    inputValue = input(requestList)
+    if config.defaultUser == 0:
+        inputValue = input(requestList)
+    else:
+        inputValue = config.defaultUser
 
     if int(inputValue) > 0:
         count = 1
@@ -119,8 +126,12 @@ def menu_OpenTypeRequest():
         requestList += f"{count} - {section}\n"
         count += 1
 
-    inputValue = input(requestList)
-    inputValue = int(inputValue)
+    if config.defaultRequest == 0:
+        inputValue = input(requestList)
+        inputValue = int(inputValue)
+    else:
+        inputValue = config.defaultRequest
+
     if 1 <= inputValue <= count:
         section = configRequest.sections()[inputValue - 1]
         print("\nTipo de chamado:", section)
@@ -136,9 +147,12 @@ def menu_OpenTypeRequest():
         config.request_knowledge = configRequest.get(section, "request_knowledge")
 
         if len(config.request_patrimonio) <= 1:
-            config.request_patrimonio = input(
-                "Este tipo de chamado exige um patrimonio: "
-            )
+            if config.defaultPatrimonio == 0:
+                config.request_patrimonio = input(
+                    "Este tipo de chamado exige um patrimonio: "
+                )
+            else:
+                config.request_patrimonio = config.defaultPatrimonio
     elif inputValue == 0:
         return
     else:
