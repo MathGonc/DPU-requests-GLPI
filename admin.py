@@ -30,7 +30,7 @@ xpathPageRequestReview = '//*[@id="service-request-view"]/div/div/div/div[1]/div
 
 def adminLogin():
     cookies.loadCookie(cookies.cookieAdminFile)
-    config.driver.get(config.page.get("admin"))
+    config.driver.get(config.page["admin"])
     WebDriverWait(config.driver, 60).until(
         EC.presence_of_element_located((By.XPATH, xpathPageRequestList))
     )
@@ -71,8 +71,14 @@ def compareRequestTextWithFile(requestId, requestText):
     with open("requests.ini", "r", encoding="utf-8") as file:
         configRequest.read_file(file)
     sections = list(configRequest.keys())
+    print("Texto base: " + requestText)
     for section in sections:
-        if requestText in configRequest.get(section, "request_problem"):
+        if section == "DEFAULT":
+            continue  # evitar reconhecer uma solução vazia no requestText
+        if configRequest.get(section, "request_problem") in requestText:
+            print(
+                "Texto de comparação: " + configRequest.get(section, "request_problem")
+            )
             config.request_number = requestId
 
             config.request_patrimonio = configRequest.get(section, "request_patrimonio")
@@ -298,7 +304,9 @@ def SetKnowledges(auto):
 
 
 def requestClose():
+    time.sleep(config.sleeptime)
     utils.waitPageBlockElement()
+    time.sleep(config.sleeptime)
 
     # Suspend?
     if len(config.driver.find_elements(By.XPATH, xpathReactive)) > 0:

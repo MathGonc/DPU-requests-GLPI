@@ -71,7 +71,7 @@ def setUserInfo():
         cookies.loadCookie(config.userLoginName + cookies.extension)
 
     if config.config.has_section(config.userLoginName):
-        config.sala = int(config.config.get(config.userLoginName, "sala"))
+        config.sala = config.config.get(config.userLoginName, "sala")
         config.telefone = int(config.config.get(config.userLoginName, "telefone"))
 
     if config.sala == 0:
@@ -79,33 +79,51 @@ def setUserInfo():
         config.sala = random.choice(salas_list)
         ramal_list = [9850, 9851, 9852, 9853, 9854]
         config.telefone = str(random.choice(ramal_list))
+    else:
+        salaPrefixList = ["", "Sala ", "sala "]
+        config.sala = random.choice(salaPrefixList) + str(config.sala)
 
-    # random add 3311 or not
     if len(str(config.telefone)) == 4:
-        match random.randint(0, 2):
-            case 0:
-                config.telefone = config.telefone
-            case 1:
-                config.telefone = "3311" + str(config.telefone)
-            case 2:
-                config.telefone = "3311-" + str(config.telefone)
+        # variables
+        if random.randrange(0, 1) == 0:
+            config.telefone = random.choice(["3311", "3311-", "3311 "]) + str(
+                config.telefone
+            )
+        if random.randrange(0, 1) == 0:
+            config.telefone = random.choice(["61", "61 ", "(61)", "(61) "]) + str(
+                config.telefone
+            )
 
-    match config.sala:
-        case config.sala if 0 <= config.sala <= 11:
-            match random.randint(0, 4):
-                case 0:
-                    config.andar = "terreo"
-                case 1:
-                    config.andar = "Térreo"
-                case 2:
-                    config.andar = "Terrestre"
-                case 3:
-                    config.andar = "Primeiro piso"
-                case 4:
-                    config.andar = "0"
-
-        case config.sala if 12 <= config.sala <= 20:
-            config.andar = 1
+        # match config.sala:
+        # case config.sala if 0 <= config.sala <= 11:
+        listAndar = [
+            "terreo",
+            "Térreo",
+            "Terrestre",
+            "Primeiro piso",
+            "0",
+            "Piso térreo",
+            "Térreo",
+            "Tér.",
+            "Piso 0",
+            "Andar térreo",
+            "Piso um",
+            "1º andar",
+            "1º piso",
+            "Piso principal",
+            "Piso de entrada",
+            "Piso de acesso",
+            "Andar principal",
+            "Nível 0",
+            "Nível um",
+            "Andar zero",
+            "Nível principal",
+            "Térreo superior",
+            "Andar de entrada",
+        ]
+        config.andar = random.choice(listAndar)
+        # case config.sala if 12 <= config.sala <= 20:
+        #     config.andar = 1
 
 
 def setPageRequest():

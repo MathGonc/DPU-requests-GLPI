@@ -5,6 +5,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 
 import config
 import user
@@ -13,8 +14,14 @@ import cookies
 
 
 def openBrowser():
-    config.driver = webdriver.Chrome(executable_path="chromedriver")
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument(f'--app={config.page["home"]}')
+    config.driver = webdriver.Chrome(
+        executable_path="chromedriver", chrome_options=chrome_options
+    )
     config.driver.maximize_window()
+
+    config.driver.delete_all_cookies()
 
 
 def openMenu():
@@ -117,14 +124,15 @@ def menu_OpenTypeRequest():
         configRequest.read_file(file)
 
     # Montar a lista de opções
-    requestList = "\nOpen request:\n0 - (Modelo padrão)\n"
+    requestList = "\nOpen request:\n"
     count = 1
     sections = list(configRequest.keys())
     for section in sections:
         if section == "DEFAULT":
-            continue
-        requestList += f"{count} - {section}\n"
-        count += 1
+            requestList += f"0 - (Modelo padrão)\n"
+        else:
+            requestList += f"{count} - {section}\n"
+            count += 1
 
     if config.defaultRequest == 0:
         inputValue = input(requestList)
@@ -132,28 +140,30 @@ def menu_OpenTypeRequest():
     else:
         inputValue = config.defaultRequest
 
-    if 1 <= inputValue <= count:
-        section = configRequest.sections()[inputValue - 1]
-        print("\nTipo de chamado:", section)
+        if 1 <= inputValue <= count:
+            section = configRequest.sections()[inputValue - 1]
+            print("\nTipo de chamado:", section)
 
-        config.request_patrimonio = configRequest.get(section, "request_patrimonio")
-        config.request_link = configRequest.get(section, "request_link")
-        config.request_problem = configRequest.get(section, "request_problem")
-        config.request_class_cause = configRequest.get(section, "request_class_cause")
-        config.request_class_solution = configRequest.get(
-            section, "request_class_solution"
-        )
-        config.request_solution = configRequest.get(section, "request_solution")
-        config.request_knowledge = configRequest.get(section, "request_knowledge")
+            config.request_patrimonio = configRequest.get(section, "request_patrimonio")
+            config.request_link = configRequest.get(section, "request_link")
+            config.request_problem = configRequest.get(section, "request_problem")
+            config.request_class_cause = configRequest.get(
+                section, "request_class_cause"
+            )
+            config.request_class_solution = configRequest.get(
+                section, "request_class_solution"
+            )
+            config.request_solution = configRequest.get(section, "request_solution")
+            config.request_knowledge = configRequest.get(section, "request_knowledge")
 
-        if len(config.request_patrimonio) <= 1:
-            if config.defaultPatrimonio == 0:
-                config.request_patrimonio = input(
-                    "Este tipo de chamado exige um patrimonio: "
-                )
-            else:
-                config.request_patrimonio = config.defaultPatrimonio
-    elif inputValue == 0:
-        return
-    else:
-        print("Opção inválida")
+            if len(config.request_patrimonio) <= 1:
+                if config.defaultPatrimonio == 0:
+                    config.request_patrimonio = input(
+                        "Este tipo de chamado exige um patrimonio: "
+                    )
+                else:
+                    config.request_patrimonio = config.defaultPatrimonio
+        elif inputValue == 0:
+            return
+        else:
+            print("Opção inválida")

@@ -1,7 +1,7 @@
 from configparser import ConfigParser
 
 config = ConfigParser()
-config.read("config.ini")
+config.read("config.ini", encoding="utf-8")
 
 driver = ""
 page = {
@@ -14,7 +14,7 @@ page = {
     "rate": "https://suporte.dpu.def.br/citsmart/pages/smartPortal/smartPortal.load#/my-requests",
 }
 
-sleeptime = 1
+sleeptime = 3
 looptime = 300
 
 # geral
@@ -24,7 +24,7 @@ waitConfirmClose = config.get("default", "waitConfirmClose")
 defaultOption = int(config.get("default", "defaultOption"))
 defaultUser = int(config.get("default", "defaultUser"))
 defaultRequest = int(config.get("default", "defaultRequest"))
-defaultPatrimonio = config.get("default", "defaultPatrimonio")
+defaultPatrimonio = int(config.get("default", "defaultPatrimonio"))
 city = config.get("default", "city")
 
 # user
