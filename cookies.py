@@ -52,7 +52,7 @@ def loadCookie(cookieName):
             cookie = pickle.load(open(pathCookie + cookieName, "rb"))
             for i in cookie:
                 config.driver.add_cookie(i)
-            config.driver.get(config.page.get("oa gen"))
+            config.driver.get(config.page.get("userOpenRequest"))
             print("Cookies user added")
 
     except Exception as e:

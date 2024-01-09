@@ -41,10 +41,15 @@ def rateRequest():
 
 
 def OpenRequest():
+    print("login")
     login()
+    print("setUserInfo")
     setUserInfo()
+    print("setPageRequest")
     setPageRequest()
+    print("setRequestInfo")
     setRequestInfo()
+    print("userLogout")
     userLogout()
 
 
@@ -132,6 +137,7 @@ def setPageRequest():
     if config.request_manual == 0:
         if len(config.request_link) > 0:
             config.driver.get(config.request_link)
+            print("config.request_link: ", config.request_link)
 
     WebDriverWait(config.driver, 9999).until(
         EC.presence_of_element_located((By.ID, "btn-add-servico-and-finish"))

@@ -9,6 +9,11 @@ import time
 import config
 
 
+def setManualMode(mode):
+    config.request_manual = mode
+    print("Modo manual: " + str(config.request_manual))
+
+
 def alert(string, delay=5):
     try:
         # Exibir o alerta usando JavaScript

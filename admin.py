@@ -31,7 +31,7 @@ xpathPageRequestReview = '//*[@id="service-request-view"]/div/div/div/div[1]/div
 def adminLogin():
     cookies.loadCookie(cookies.cookieAdminFile)
     config.driver.get(config.page["admin"])
-    WebDriverWait(config.driver, 60).until(
+    WebDriverWait(config.driver, 9999).until(
         EC.presence_of_element_located((By.XPATH, xpathPageRequestList))
     )
 
@@ -133,7 +133,7 @@ def SelectRequestToClose():
 
                 if r == (len(requestList) - 1):
                     config.request_number = requestNumber
-                    config.request_manual = 1
+                    utils.setManualMode(1)
                     print(
                         f"no automated request found, opening [{requestNumber}] in manual mode..."
                     )
