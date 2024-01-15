@@ -84,6 +84,8 @@ def openMenu():
             print("no option selected, exiting...")
             time.sleep(config.sleeptime)
 
+    menuReset()
+
 
 def menu_select_user():
     # input user
@@ -166,3 +168,11 @@ def menu_OpenTypeRequest():
         return
     else:
         print("Opção inválida")
+
+
+def menuReset():
+    inputValue = input("\nSelect an option\n" + "1 - Repetir\n" + "2 - Fechar\n")
+    if int(inputValue) == 1:
+        openMenu()
+    else:
+        quit()

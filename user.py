@@ -252,3 +252,5 @@ def userLogout():
     config.driver.get(config.page.get("logout"))  # user logout
     time.sleep(config.sleeptime)
     config.driver.delete_all_cookies()
+    time.sleep(config.sleeptime)
+    config.driver.close()
