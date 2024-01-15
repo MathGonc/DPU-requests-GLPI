@@ -164,26 +164,31 @@ def setTextSolution():
     if random.randint(0, 1) == 0:
         nameUser = "Sr(a) " + nameUser
 
-    # Patrimonio
-    WebDriverWait(config.driver, 60).until(
-        EC.presence_of_element_located((By.XPATH, xpathRequestPatrominio))
-    )
-    patrimonio = config.driver.find_element(
-        By.XPATH, xpathRequestPatrominio
-    ).get_property("value")
+    # Patrimonio~
+    patrimonio = "N/A"
+    try:
+        patrimonioElement = WebDriverWait(config.driver, 20).until(
+            EC.presence_of_element_located((By.XPATH, xpathRequestPatrominio))
+        )
+        patrimonio = patrimonioElement.get_property("value")
 
-    if patrimonio.isnumeric() == True:
-        match (random.randint(0, 2)):
-            case 0:
-                patrimonio = patrimonio
-            case 1:
-                patrimonio = "CPE" + patrimonio
-            case 2:
-                patrimonio = "DPU" + patrimonio
+        if patrimonio.isnumeric() == True:
+            match (random.randint(0, 2)):
+                case 0:
+                    patrimonio = patrimonio
+                case 1:
+                    patrimonio = "CPE" + patrimonio
+                case 2:
+                    patrimonio = "DPU" + patrimonio
 
-    if len(str(patrimonio)) < 3:
-        listSemPatrimonio = ["s/n", "S/N", "Sem patrimonio", "Sem numero", "sa"]
-        patrimonio = listSemPatrimonio[random.randint(0, (len(listSemPatrimonio) - 1))]
+        if len(str(patrimonio)) < 3:
+            listSemPatrimonio = ["s/n", "S/N", "Sem patrimonio", "Sem numero", "sa"]
+            patrimonio = listSemPatrimonio[
+                random.randint(0, (len(listSemPatrimonio) - 1))
+            ]
+
+    except Exception as e:
+        print(e)
 
     WebDriverWait(config.driver, 60).until(
         EC.presence_of_element_located((By.XPATH, xpathSolution))
@@ -344,9 +349,13 @@ def requestClose():
         random.randint(0, (len(listClassCause) - 1))
     ]
 
-    config.driver.find_element(
-        By.XPATH, '// *[ @ id = "cause"] / div[1] / span / span[2]'
-    ).click()
+    causeButton = WebDriverWait(config.driver, 9999).until(
+        EC.element_to_be_clickable(
+            (By.XPATH, '// *[ @ id = "cause"] / div[1] / span / span[2]')
+        )
+    )
+    causeButton.click()
+
     config.driver.find_element(By.XPATH, '//*[@id="cause"]/input[1]').send_keys(
         config.request_class_cause
     )
@@ -396,12 +405,15 @@ def requestClose():
     else:  # Automatico
         SetKnowledges(True)
         if config.waitConfirmClose == 0:
-            element = config.driver.find_element(
-                By.XPATH, '// *[ @ id = "request-save-submit"]'
-            )
             WebDriverWait(config.driver, 9999).until(
                 EC.invisibility_of_element_located(
                     (By.XPATH, "//div[@class='modal fade']")
+                )
+            )
+
+            element = WebDriverWait(config.driver, 9999).until(
+                EC.element_to_be_clickable(
+                    (By.XPATH, '// *[ @ id = "request-save-submit"]')
                 )
             )
             element.click()

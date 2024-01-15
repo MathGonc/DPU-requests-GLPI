@@ -18,9 +18,9 @@ sleeptime = 3
 looptime = 300
 
 # geral
-needMedia = config.get("default", "needMedia")
-waitConfirmOpen = config.get("default", "waitConfirmOpen")
-waitConfirmClose = config.get("default", "waitConfirmClose")
+needMedia = int(config.get("default", "needMedia"))
+waitConfirmOpen = int(config.get("default", "waitConfirmOpen"))
+waitConfirmClose = int(config.get("default", "waitConfirmClose"))
 defaultOption = int(config.get("default", "defaultOption"))
 defaultUser = int(config.get("default", "defaultUser"))
 defaultRequest = int(config.get("default", "defaultRequest"))

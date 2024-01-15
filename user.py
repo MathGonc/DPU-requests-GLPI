@@ -210,14 +210,20 @@ def setRequestInfo():
     if field:
         field[0].send_keys(config.request_problem)
 
+    print("0")
     if config.request_manual == 0:
+        print("1")
         if config.waitConfirmOpen == 0:
+            print("2")
             # confirm
-            field = config.driver.find_elements(
-                By.XPATH, '//*[@id="btn-add-servico-and-finish"]'
+            field = WebDriverWait(config.driver, 9999).until(
+                EC.element_to_be_clickable((By.ID, "btn-add-servico-and-finish"))
             )
-            if field:
-                field[0].click()
+
+            print("3")
+            field.click()
+
+            print("5")
             time.sleep(15)
 
     # get request number
