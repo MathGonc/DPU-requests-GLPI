@@ -71,13 +71,15 @@ def compareRequestTextWithFile(requestId, requestText):
     with open("requests.ini", "r", encoding="utf-8") as file:
         configRequest.read_file(file)
     sections = list(configRequest.keys())
-    print("Texto base: " + requestText)
+    print("\nTexto encontrado no site:\n" + requestText + "\n\n")
     for section in sections:
         if section == "DEFAULT":
             continue  # evitar reconhecer uma solução vazia no requestText
-        if configRequest.get(section, "request_problem") in requestText:
+        if requestText in configRequest.get(section, "request_problem"):
             print(
-                "Texto de comparação: " + configRequest.get(section, "request_problem")
+                "\nTexto base para comparação:\n"
+                + configRequest.get(section, "request_problem")
+                + "\n\n"
             )
             config.request_number = requestId
 
