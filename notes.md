@@ -2,9 +2,19 @@
 
 ## To do:
 
-aguardar elemento class="loading-neuro" desaparecer
+Caso não encontre nenhum documento na base de conhecimento, não continuar no modo automatico
+aguardar elemento class="loading-neuro" desaparecer.
+
+---
+
+Resolver o erro:
+Message: element click intercepted: Element <button id="request-save-submit" type="button" ng-click="processSaveOrUpdate(salvarAvancar)" ng-show="permission.habilitaGravarEContinuar == 'S'" class="btn btn-citsmart btn-sm" ng-disabled="disableSaveActionButton" style="">...</button> is not clickable at point (1820, 932). Other element would receive the click: <div modal-render="true" tabindex="-1" role="dialog" class="modal fade ng-isolate-scope in" uib-modal-animation-class="fade" modal-in-class="in" ng-style="{'z-index': 1050 + index*10, display: 'block'}" uib-modal-window="modal-window" window-class="" size="lg" index="1" animate="animate" modal-animation="true" style="z-index: 1060; display: block;">...</div>
+
+---
 
 Abrir e-mail e procurar e-mail de elogio
+
+---
 
 https://suporte.dpu.def.br/citsmart/pages/smartPortal/smartPortal.load#/my-requests
 
@@ -27,7 +37,7 @@ Esperar sumir:
 # Tricks:
 
 target_text = "Nenhum registro encontrado!"
-elements_with_text = config.driver.find_elements(By.XPATH, "//\*[contains(text(), '{}')]".format(target_text))
+elements_with_text = driver.find_elements(By.XPATH, "//\*[contains(text(), '{}')]".format(target_text))
 
     # Verificar se a lista de elementos não está vazia, indicando que o texto foi encontrado
     if elements_with_text:

@@ -7,18 +7,18 @@ from selenium.webdriver.support import expected_conditions as EC
 
 import time
 import config
-import menu
 import utils
 import cookies
 import random
+from driver import driver
 
 
 def rateRequest():
     login()
     setUserInfo()
-    config.driver.get(config.page.get("rate"))
+    driver.get(config.page.get("rate"))
 
-    element = WebDriverWait(config.driver, 9999).until(
+    element = WebDriverWait(driver, 99999).until(
         EC.presence_of_element_located((By.ID, "idStatusMinhasSolicitacoes"))
     )
     time.sleep(config.sleeptime)
@@ -26,7 +26,7 @@ def rateRequest():
     element.send_keys("Todos" + Keys.ENTER)
     time.sleep(config.sleeptime)
 
-    button = config.driver.find_element(
+    button = driver.find_element(
         By.CSS_SELECTOR,
         f"#formMinhasSolicitacoes > div.row > div > div.col-md-1 > button",
     )
@@ -34,7 +34,7 @@ def rateRequest():
     button.click()
     time.sleep(config.sleeptime)
 
-    element = config.driver.find_elements(By.XPATH, f"//i[text()='thumbs_up_down']")
+    element = driver.find_elements(By.XPATH, f"//i[text()='thumbs_up_down']")
     utils.alert(f"{len(element)} chamados a serem avaliados")
 
     time.sleep(9999)
@@ -54,16 +54,17 @@ def OpenRequest():
 
 
 def login():
-    config.driver.get(config.page.get("login"))
+    pyautogui.hotkey("win", "down")
+    driver.get(config.page.get("login"))
 
     if len(config.userLoginName) == 0:
-        WebDriverWait(config.driver, 9999).until(
+        WebDriverWait(driver, 99999).until(
             EC.presence_of_element_located(
                 (By.XPATH, "/html/body/nav/div/div[1]/a/img")
             )
         )  # logo dpu
 
-        nameUser = config.driver.find_element(
+        nameUser = driver.find_element(
             By.XPATH, '// *[ @ id = "navbar"] / ul / li[4] / a / span[1]'
         ).text
         cookies.saveCookie(nameUser.split()[0])
@@ -136,10 +137,10 @@ def setPageRequest():
 
     if config.request_manual == 0:
         if len(config.request_link) > 0:
-            config.driver.get(config.request_link)
+            driver.get(config.request_link)
             print("config.request_link: ", config.request_link)
 
-    WebDriverWait(config.driver, 9999).until(
+    WebDriverWait(driver, 99999).until(
         EC.presence_of_element_located((By.ID, "btn-add-servico-and-finish"))
     )
     time.sleep(config.sleeptime)
@@ -149,66 +150,76 @@ def setRequestInfo():
     utils.waitPageBlockElement()
 
     # IF FRAME
-    # WebDriverWait(config.driver, 9999).until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, '//*[@id="questionario"]')))
-    config.driver.switch_to.frame("questionario")
-    field = config.driver.find_elements(
+    # # WebDriverWait(driver, 99999).until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, '//*[@id="questionario"]')))
+    driver.switch_to.frame("questionario")
+    field = driver.find_elements(
         By.XPATH, '//*[@id="campoDyn_152"]'
     )  # //*[@id="campoDyn_63"]
     if field:
         field[0].click(), field[0].send_keys(config.city + Keys.ENTER)
-    field = config.driver.find_elements(By.XPATH, '//*[@id="campoDyn_65"]')
+    field = driver.find_elements(By.XPATH, '//*[@id="campoDyn_65"]')
     if field:
         field[0].click(), field[0].send_keys(config.sala)
-    field = config.driver.find_elements(By.XPATH, '//*[@id="campoDyn_66"]')
+    field = driver.find_elements(By.XPATH, '//*[@id="campoDyn_66"]')
     if field:
         field[0].click(), field[0].send_keys(config.andar)
-    field = config.driver.find_elements(By.XPATH, '//*[@id="campoDyn_67"]')
+    field = driver.find_elements(By.XPATH, '//*[@id="campoDyn_67"]')
     if field:
         field[0].click(), field[0].send_keys(config.request_patrimonio)
-    field = config.driver.find_elements(By.XPATH, '//*[@id="campoDyn_68"]')
+    field = driver.find_elements(By.XPATH, '//*[@id="campoDyn_68"]')
     if field:
         field[0].click(), field[0].send_keys(config.request_problem)
-    config.driver.switch_to.default_content()
+    driver.switch_to.default_content()
 
     # IF NOT FRAME
-    field = config.driver.find_elements(
+    element = driver.find_elements(
         By.XPATH,
-        "/html/body/div[5]/div[4]/div/div/div[1]/div/div/div[3]/div/div[3]/div[1]/div/div/div/form/div[1]/div[1]/div/div/select",
+        '//*[@id="tb_localidade.nome_localidade"]/div/select',
     )
-    if field:
-        field[0].send_keys(config.city)
+    if element:
+        element[0].send_keys(config.city)
 
-    field = config.driver.find_elements(
+    element = driver.find_elements(
         By.XPATH,
-        "/html/body/div[5]/div[4]/div/div/div[1]/div/div/div[3]/div/div[3]/div[1]/div/div/div/form/div[1]/div[2]/div/div/input",
+        '//*[@id="tb_localidade.Sala"]',
     )
-    if field:
-        field[0].send_keys(config.sala)
+    if element:
+        ActionChains(driver).move_to_element(element[0]).click(element[0]).send_keys(
+            config.sala
+        ).perform()
 
-    field = config.driver.find_elements(
+    element = driver.find_elements(
         By.XPATH,
-        "/html/body/div[5]/div[4]/div/div/div[1]/div/div/div[3]/div/div[3]/div[1]/div/div/div/form/div[1]/div[3]/div/div/input",
+        '//*[@id="tb_localidade.Andar"]',
     )
-    if field:
-        field[0].send_keys(config.andar)
+    if element:
+        ActionChains(driver).move_to_element(element[0]).click(element[0]).send_keys(
+            config.andar
+        ).perform()
 
-    field = config.driver.find_elements(
+    element = driver.find_elements(
         By.XPATH,
-        "/html/body/div[5]/div[4]/div/div/div[1]/div/div/div[3]/div/div[3]/div[1]/div/div/div/form/div[2]/div[1]/div/input",
+        '//*[@id="tb_localidade.Telefone"]',
     )
-    if field:
-        field[0].send_keys(config.telefone)
+    if element:
+        ActionChains(driver).move_to_element(element[0]).click(element[0]).send_keys(
+            config.telefone
+        ).perform()
 
-    field = config.driver.find_elements(
+    element = driver.find_elements(
         By.XPATH,
-        "/html/body/div[5]/div[4]/div/div/div[1]/div/div/div[3]/div/div[3]/div[1]/div/div/div/form/div[2]/div[2]/div/div/input",
+        '//*[@id="tb_localidade.Patrimonio"]',
     )
-    if field:
-        field[0].send_keys(config.request_patrimonio)
+    if element:
+        ActionChains(driver).move_to_element(element[0]).click(element[0]).send_keys(
+            config.request_patrimonio
+        ).perform()
 
-    field = config.driver.find_elements(By.XPATH, '//*[@id="solicitacaoObservacao"]')
-    if field:
-        field[0].send_keys(config.request_problem)
+    element = driver.find_elements(By.XPATH, '//*[@id="solicitacaoObservacao"]')
+    if element:
+        ActionChains(driver).move_to_element(element[0]).click(element[0]).send_keys(
+            config.request_problem
+        ).perform()
 
     print("0")
     if config.request_manual == 0:
@@ -216,19 +227,16 @@ def setRequestInfo():
         if config.waitConfirmOpen == 0:
             print("2")
             # confirm
-            field = WebDriverWait(config.driver, 9999).until(
+            field = WebDriverWait(driver, 99999).until(
                 EC.element_to_be_clickable((By.ID, "btn-add-servico-and-finish"))
             )
 
             print("3")
             field.click()
 
-            print("5")
-            time.sleep(15)
-
     # get request number
     try:
-        WebDriverWait(config.driver, 1000).until(
+        getRequestNumber = WebDriverWait(driver, 1000).until(
             EC.presence_of_element_located(
                 (
                     By.XPATH,
@@ -236,9 +244,7 @@ def setRequestInfo():
                 )
             )
         )
-        getRequestNumber = config.driver.find_element(
-            By.XPATH, "/html/body/div[6]/div/div/div[2]/div/div/div/div/div/div[1]/h2"
-        ).get_attribute("outerText")
+        getRequestNumber.get_attribute("outerText")
         config.request_number = getRequestNumber
         print("Chamado nº" + getRequestNumber + " aberto")
     except:
@@ -249,8 +255,7 @@ def setRequestInfo():
 
 
 def userLogout():
-    config.driver.get(config.page.get("logout"))  # user logout
+    driver.get(config.page.get("logout"))  # user logout
     time.sleep(config.sleeptime)
-    config.driver.delete_all_cookies()
+    driver.delete_all_cookies()
     time.sleep(config.sleeptime)
-    config.driver.close()

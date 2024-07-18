@@ -3,7 +3,6 @@ from configparser import ConfigParser
 config = ConfigParser()
 config.read("config.ini", encoding="utf-8")
 
-driver = ""
 page = {
     "home": "https://suporte.dpu.def.br/",
     "login": "https://suporte.dpu.def.br/",
@@ -14,7 +13,7 @@ page = {
     "rate": "https://suporte.dpu.def.br/citsmart/pages/smartPortal/smartPortal.load#/my-requests",
 }
 
-sleeptime = 3
+sleeptime = 1
 looptime = 300
 
 # geral

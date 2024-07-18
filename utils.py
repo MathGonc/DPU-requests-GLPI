@@ -7,6 +7,7 @@ from selenium.webdriver.common.alert import Alert
 
 import time
 import config
+from driver import driver
 
 
 def setManualMode(mode):
@@ -17,10 +18,10 @@ def setManualMode(mode):
 def alert(string, delay=5):
     try:
         # Exibir o alerta usando JavaScript
-        config.driver.execute_script(f"alert('{string}');")
+        driver.execute_script(f"alert('{string}');")
 
         # Aguardar e lidar com o alerta
-        alert = WebDriverWait(config.driver, 10).until(EC.alert_is_present())
+        alert = WebDriverWait(driver, 10).until(EC.alert_is_present())
         if alert:
             alert_text = alert.text
             print("Alert Text:", alert_text)
@@ -37,14 +38,33 @@ def alert(string, delay=5):
 
 
 def waitPageBlockElement():
-    WebDriverWait(config.driver, 9999).until(
+    WebDriverWait(driver, 99999).until(
         EC.invisibility_of_element_located((By.CLASS_NAME, "loading-neuro"))
     )
 
-    WebDriverWait(config.driver, 9999).until(
+    WebDriverWait(driver, 99999).until(
         EC.invisibility_of_element_located(
             (By.ID, "divBloqueiaTela_JANELA_AGUARDE_MENU")
         )
     )
 
-    return
+
+def verifyPageErrorExist():
+    try:
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, f"//span[text()='undefined']"))
+        )
+        print("Error undefined in loading-neuro, reloading...")
+        driver.refresh()
+        return True
+    except:
+        print("loading-neuro show with success")
+        return False
+
+
+def verifyBrowserIsOpen():
+    try:
+        driver.find_element(By.TAG_NAME, "body")
+        return True
+    except:
+        return False

@@ -2,6 +2,7 @@ import random
 import os
 from configparser import ConfigParser
 
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
@@ -13,12 +14,10 @@ import config
 import menu
 import cookies
 import utils
+from driver import driver
 
-xpathSuspended = '//*[@id="radio-request-suspensa"]'
-xpathReactive = '//*[@id="request-reactivate"]'
 xpathSolution = "/html/body/div[3]/div/div[2]/div/div[1]/div/form/div/div/div/div/div/div[2]/div/div/div[3]/div[2]/div[6]/div/fieldset/div[4]/div[2]/div/div/citsmart-trix-editor/div/trix-editor"
 xpathNameUser = '//*[@id="service-request-view"]/div/div/div/div[2]/div/div/div[3]/div[1]/div[1]/div/fieldset/div[1]/div[1]/div/div[2]'
-xpathRequestPatrominio = "/html/body/div[3]/div/div[2]/div/div[1]/div/form/div/div/div/div/div/div[2]/div/div/div[3]/div[2]/div[3]/div/fieldset/div/div/div[2]/div[2]/div/div/input"
 xpathRequestCaptureTicket = '//*[@id="service-request-view"]/div/div/div/div[1]/div/ul/li[4]/div[1]/div[2]/div[2]/span/a'
 xpathRequestLoading = (
     '//*[@id="divCorpoJanelaAguarde_JANELA_AGUARDE_MENU"]/table/tbody/tr/td'
@@ -29,18 +28,19 @@ xpathPageRequestReview = '//*[@id="service-request-view"]/div/div/div/div[1]/div
 
 
 def adminLogin():
+    print("adminLogin", adminLogin)
     cookies.loadCookie(cookies.cookieAdminFile)
-    config.driver.get(config.page["admin"])
-    WebDriverWait(config.driver, 9999).until(
+    driver.get(config.page["admin"])
+    WebDriverWait(driver, 99999).until(
         EC.presence_of_element_located((By.XPATH, xpathPageRequestList))
     )
 
 
 def adminFindRequestLoop():
-    # config.driver.find_element(By.XPATH, '/html/body/div[3]/div/div[2]/div/div[1]/div/form/div/div[2]/div[1]/div[2]/button[2]/i').click() #click in refresh and wait
+    # driver.find_element(By.XPATH, '/html/body/div[3]/div/div[2]/div/div[1]/div/form/div/div[2]/div[1]/div[2]/button[2]/i').click() #click in refresh and wait
 
     requestItem = "list-item-" + config.request_number
-    if len(config.driver.find_elements(By.ID, requestItem)) > 0:
+    if len(driver.find_elements(By.ID, requestItem)) > 0:
         print(f"Chamado {config.request_number} encontrado na fila")
     else:
         print(
@@ -52,7 +52,7 @@ def adminFindRequestLoop():
 
 def verifyRequestExist():
     requestItem = "list-item-" + str(config.request_number)
-    if len(config.driver.find_elements(By.ID, requestItem)) > 0:
+    if len(driver.find_elements(By.ID, requestItem)) > 0:
         print(f"Chamado {config.request_number} encontrado")
         return 1
 
@@ -99,10 +99,9 @@ def compareRequestTextWithFile(requestId, requestText):
 
 
 def SelectRequestToClose():
-    print(config.request_manual)
     if config.request_manual == 0:
         time.sleep(config.sleeptime)
-        requestList = config.driver.find_elements(
+        requestList = driver.find_elements(
             By.XPATH, "//div[contains(@class, 'request-id ng-binding')]"
         )
         print(f"{str(len(requestList))} requests in list")
@@ -117,7 +116,7 @@ def SelectRequestToClose():
             requestNumber = requestList[r].get_property("innerText")
             print(requestNumber)
 
-            elementDescription = config.driver.find_elements(
+            elementDescription = driver.find_elements(
                 By.CSS_SELECTOR,
                 f"#list-item-{requestNumber} > div.tableless-td.ellipsis.descricao.ng-binding.ng-hide",
             )
@@ -141,15 +140,15 @@ def SelectRequestToClose():
                     )
 
         print(config.page.get("admin_requestid") + config.request_number)
-        config.driver.get(config.page.get("admin_requestid") + config.request_number)
-        WebDriverWait(config.driver, 60).until(
+        driver.get(config.page.get("admin_requestid") + config.request_number)
+        WebDriverWait(driver, 60).until(
             EC.presence_of_element_located((By.XPATH, xpathPageRequestReview))
         )
 
 
 def setTextSolution():
     # Nome
-    nameUser = config.driver.find_element(By.XPATH, xpathNameUser).text
+    nameUser = driver.find_element(By.XPATH, xpathNameUser).text
     match (random.randint(0, 2)):
         case 0:
             nameUser = nameUser
@@ -169,10 +168,17 @@ def setTextSolution():
     # Patrimonio~
     patrimonio = "N/A"
     try:
-        patrimonioElement = WebDriverWait(config.driver, 20).until(
-            EC.presence_of_element_located((By.XPATH, xpathRequestPatrominio))
+        patrimonioElement = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located(
+                (
+                    By.XPATH,
+                    "/html/body/div[3]/div/div[2]/div/div[1]/div/form/div/div/div/div/div/div[2]/div/div/div[3]/div[2]/div[3]/div/fieldset/div/div/div[3]/div[2]/div/div/input",
+                )
+            )
         )
         patrimonio = patrimonioElement.get_property("value")
+        config.request_patrimonio = patrimonioElement.get_property("value")
+        print("Patrimonio: " + patrimonio)
 
         if patrimonio.isnumeric() == True:
             match (random.randint(0, 2)):
@@ -192,10 +198,10 @@ def setTextSolution():
     except Exception as e:
         print(e)
 
-    WebDriverWait(config.driver, 60).until(
+    WebDriverWait(driver, 60).until(
         EC.presence_of_element_located((By.XPATH, xpathSolution))
     )
-    elementSolution = config.driver.find_element(By.XPATH, xpathSolution)
+    elementSolution = driver.find_element(By.XPATH, xpathSolution)
 
     # Input solution
     elementSolution.send_keys("Prezado(a): " + nameUser)
@@ -203,10 +209,28 @@ def setTextSolution():
     elementSolution.send_keys("Patrimônio: " + patrimonio)
     elementSolution.send_keys(Keys.ENTER)
 
+    textSolutionPart1 = random.choice(
+        ["reportou", "comunicou", "informou", "pediu", "solicitou"]
+    )
+    textSolutionPart2 = random.choice(["problema", "chamado", "ticket"])
+    textSolutionPart3 = random.choice(["resolvido", "solucionado"])
+    textSolutionPart4 = random.choice(["conforme havia sido", "como foi"])
+    textSolutionPart5 = random.choice(["pedido", "solicitado"])
+    textSolution = (
+        "Usuário "
+        + textSolutionPart1
+        + " XXXXXXX, "
+        + textSolutionPart2
+        + " "
+        + textSolutionPart3
+        + ", "
+        + textSolutionPart4
+        + " "
+        + textSolutionPart5
+        + "."
+    )
     if len(config.request_solution) < 3:
-        elementSolution.send_keys(
-            "Descrição de atendimento: Usuário reportou que XXXXXXX, problema resolvido, conforme havia sido solicitado."
-        )
+        elementSolution.send_keys("Descrição de atendimento: " + textSolution)
         elementSolution.send_keys(Keys.ENTER)
         elementSolution.send_keys(
             "Testes executados: Teste realizado na presença do usuário, tudo em funcionamento."
@@ -236,15 +260,15 @@ def setTextSolution():
 
 
 def requestCapture():
-    element = config.driver.find_elements(By.XPATH, f"//*[text()='Capturar ticket']")
+    element = driver.find_elements(By.XPATH, f"//*[text()='Capturar ticket']")
     if element:
         utils.waitPageBlockElement()
 
-        ActionChains(config.driver).move_to_element(element[0]).perform()
+        ActionChains(driver).move_to_element(element[0]).perform()
         time.sleep(config.sleeptime)
         element[0].click()
 
-        element = WebDriverWait(config.driver, 9999).until(
+        element = WebDriverWait(driver, 99999).until(
             EC.presence_of_element_located(
                 (By.CSS_SELECTOR, f"button.btn.btn-sm.btn-v3-citsmart.ng-binding")
             )
@@ -253,25 +277,69 @@ def requestCapture():
         time.sleep(config.sleeptime)
 
 
+def SetIcRelated():
+    element = driver.find_element(By.ID, "nav-item-service-request-configuration-item")
+    element.click()
+
+    element = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located(
+            (By.ID, "modal-request-configuration-item-pesquisar")
+        )
+    )
+    element.click()
+
+    driver.switch_to.frame("iframeModal")  # enter iframe
+    element = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "filtroIdentificacao"))
+    )
+    element.send_keys(config.request_patrimonio)
+
+    element = WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.ID, "btnpesquisa"))
+    )
+    element.click()
+
+    try:
+        element = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located(
+                (By.XPATH, f"//*[text()='Nenhum registro encontrado!']")
+            )
+        )
+        utils.alert("Nenhum patrimonio encontrado")
+    except:
+        utils.alert("Patrimonio encontrado")
+        element = WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located(
+                (By.XPATH, f"//a[text()='Selecionar						']")
+            )
+        )
+        element.click()
+        time.sleep(config.sleeptime)
+        driver.switch_to.default_content()  # exit iframe
+        ActionChains(driver).send_keys(Keys.ESCAPE).perform()
+
+    # Wait for the main menu to be clickable to continue
+    element = WebDriverWait(driver, 99999).until(
+        EC.element_to_be_clickable((By.ID, "cit--header-menu-toogle-link"))
+    )
+
+
 def SetKnowledges(auto):
-    element = config.driver.find_element(By.CLASS_NAME, "service-request-menu-toggle")
+
+    element = driver.find_element(By.ID, "nav-item-service-request-knowledges")
     element.click()
     time.sleep(config.sleeptime)
 
-    element = config.driver.find_element(By.ID, "nav-item-service-request-knowledges")
-    element.click()
-    time.sleep(config.sleeptime)
-
-    elementText = config.driver.find_elements(
+    elementText = driver.find_elements(
         By.XPATH, f"//*[text()='Nenhum registro encontrado!']"
     )
     if len(elementText) == 0:
         utils.alert(f"Documento já anexado")
-        ActionChains(config.driver).send_keys(Keys.ESCAPE).perform()
+        ActionChains(driver).send_keys(Keys.ESCAPE).perform()
         time.sleep(config.sleeptime)
         return
 
-    button = config.driver.find_element(
+    button = driver.find_element(
         By.XPATH, f"//button[text()='Pesquisa de Conhecimentos']"
     )
     button.click()
@@ -282,15 +350,15 @@ def SetKnowledges(auto):
         return
 
     if auto == True:
-        element = config.driver.find_element(By.ID, "lookup-input-Título")
+        element = driver.find_element(By.ID, "lookup-input-Título")
         element.send_keys(config.request_knowledge)
         time.sleep(config.sleeptime)
 
-        button = config.driver.find_element(By.XPATH, f"//button[text()='Buscar']")
+        button = driver.find_element(By.XPATH, f"//button[text()='Buscar']")
         button.click()
         time.sleep(config.sleeptime)
 
-        element = config.driver.find_elements(By.ID, "lookup-item-0")
+        element = driver.find_elements(By.ID, "lookup-item-0")
         if len(element) >= 1:
             element[0].click()
             time.sleep(config.sleeptime)
@@ -300,38 +368,59 @@ def SetKnowledges(auto):
             print("999999999999999999999999999999999")
             return
 
-        ActionChains(config.driver).send_keys(Keys.ESCAPE).perform()
+        ActionChains(driver).send_keys(Keys.ESCAPE).perform()
         time.sleep(config.sleeptime)
+        toggleServiceRequestMenu()
 
-        element = config.driver.find_element(
-            By.CLASS_NAME, "service-request-menu-toggle"
-        )
-        element.click()
-        time.sleep(config.sleeptime)
+
+def toggleServiceRequestMenu():
+    element = driver.find_element(By.CLASS_NAME, "service-request-menu-toggle")
+    element.click()
 
 
 def requestClose():
     time.sleep(config.sleeptime)
+    if utils.verifyPageErrorExist() == True:
+        return requestClose()
     utils.waitPageBlockElement()
     time.sleep(config.sleeptime)
 
+    if config.request_manual == 1:  # Get request number to link in manual mode
+        WebDriverWait(driver, 99999).until(
+            EC.presence_of_element_located(
+                (
+                    By.CSS_SELECTOR,
+                    "#service-request-view > div > div > div > div:nth-child(1) > div > ul > li:nth-child(1) > div.info.pull-left > div:nth-child(2) > div.description.ng-binding",
+                )
+            )
+        )
+        config.request_number = driver.find_element(
+            By.CSS_SELECTOR,
+            "#service-request-view > div > div > div > div:nth-child(1) > div > ul > li:nth-child(1) > div.info.pull-left > div:nth-child(2) > div.description.ng-binding",
+        ).get_property("innerText")
+        print("config.request_number: ", config.request_number)
+        time.sleep(config.sleeptime)
+
     # Suspend?
-    if len(config.driver.find_elements(By.XPATH, xpathReactive)) > 0:
-        config.driver.find_element(By.XPATH, xpathReactive).click()
-        WebDriverWait(config.driver, 60).until(
+    xpathReactive = '//*[@id="request-reactivate"]'
+    if len(driver.find_elements(By.XPATH, xpathReactive)) > 0:
+
+        driver.find_element(By.XPATH, xpathReactive).click()
+        WebDriverWait(driver, 60).until(
             EC.presence_of_element_located((By.XPATH, xpathPageRequestList))
         )
-        config.driver.get(config.page.get("admin_requestid") + config.request_number)
+
+        driver.get(config.page.get("admin_requestid") + config.request_number)
 
     requestCapture()
 
     # Button solution existis
-    element = WebDriverWait(config.driver, 9999).until(
+    element = WebDriverWait(driver, 99999).until(
         EC.presence_of_element_located((By.ID, "radio-request-resolvida"))
     )
-    ActionChains(config.driver).move_to_element(element).perform()
+    ActionChains(driver).move_to_element(element).perform()
 
-    WebDriverWait(config.driver, 9999).until(
+    WebDriverWait(driver, 99999).until(
         EC.invisibility_of_element_located((By.XPATH, "//div[@class='modal fade']"))
     )
 
@@ -351,18 +440,18 @@ def requestClose():
         random.randint(0, (len(listClassCause) - 1))
     ]
 
-    causeButton = WebDriverWait(config.driver, 9999).until(
+    causeButton = WebDriverWait(driver, 99999).until(
         EC.element_to_be_clickable(
             (By.XPATH, '// *[ @ id = "cause"] / div[1] / span / span[2]')
         )
     )
     causeButton.click()
 
-    config.driver.find_element(By.XPATH, '//*[@id="cause"]/input[1]').send_keys(
+    driver.find_element(By.XPATH, '//*[@id="cause"]/input[1]').send_keys(
         config.request_class_cause
     )
     time.sleep(config.sleeptime)
-    ActionChains(config.driver).send_keys(Keys.RETURN).perform()
+    ActionChains(driver).send_keys(Keys.RETURN).perform()
 
     # Input category solution
     listClassSolution = [
@@ -376,30 +465,39 @@ def requestClose():
         random.randint(0, (len(listClassSolution) - 1))
     ]
 
-    config.driver.find_element(
+    driver.find_element(
         By.XPATH, '//*[@id="solution-category"]/div[1]/span/span[2]'
     ).click()
 
-    config.driver.find_element(
-        By.XPATH, '//*[@id="solution-category"]/input[1]'
-    ).send_keys(config.request_class_solution)
+    driver.find_element(By.XPATH, '//*[@id="solution-category"]/input[1]').send_keys(
+        config.request_class_solution
+    )
     time.sleep(config.sleeptime)
-    ActionChains(config.driver).send_keys(Keys.RETURN).perform()
+    ActionChains(driver).send_keys(Keys.RETURN).perform()
 
-    elementRequestNumber = config.driver.find_element(
+    elementRequestNumber = driver.find_element(
         By.XPATH,
         '//*[@id="service-request-view"]/div/div/div/div[1]/div/ul/li[1]/div[1]/div[2]/div[2]',
     )
     requestNumber = elementRequestNumber.get_property("innerText")
-    elementDescription = config.driver.find_elements(
+    elementDescription = driver.find_elements(
         By.XPATH,
         '//*[@id="service-request-view"]/div/div/div/div[2]/div/div/div[3]/div[2]/div[1]/div/fieldset/div[2]/div/div/div',
     )
-    requestText = elementDescription[0].get_property("innerText")
-    requestText = requestText.replace("\n", "")
-    print(requestText)
-    compareRequestTextWithFile(requestNumber, requestText)
+    if elementDescription:
+        requestText = elementDescription[0].get_property("innerText")
+        requestText = requestText.replace("\n", "")
+        print(requestText)
+        compareRequestTextWithFile(requestNumber, requestText)
+    else:
+        print("Texto para comparação não encontrado, inserindo texto genérico...")
+
     setTextSolution()
+
+    toggleServiceRequestMenu()
+    time.sleep(config.sleeptime)
+    SetIcRelated()
+    time.sleep(config.sleeptime)
 
     if config.request_manual == 1:  # Manual
         SetKnowledges(False)
@@ -407,20 +505,20 @@ def requestClose():
     else:  # Automatico
         SetKnowledges(True)
         if config.waitConfirmClose == 0:
-            WebDriverWait(config.driver, 9999).until(
+            WebDriverWait(driver, 99999).until(
                 EC.invisibility_of_element_located(
                     (By.XPATH, "//div[@class='modal fade']")
                 )
             )
 
-            element = WebDriverWait(config.driver, 9999).until(
+            element = WebDriverWait(driver, 99999).until(
                 EC.element_to_be_clickable(
                     (By.XPATH, '// *[ @ id = "request-save-submit"]')
                 )
             )
             element.click()
 
-    WebDriverWait(config.driver, 9999).until(
+    WebDriverWait(driver, 99999).until(
         EC.invisibility_of_element_located(
             (
                 By.XPATH,

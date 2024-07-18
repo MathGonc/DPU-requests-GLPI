@@ -12,17 +12,22 @@ import user
 import admin
 import cookies
 import utils
+from driver import driver, chrome_options
 
 
-def openBrowser():
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument(f'--app={config.page["home"]}')
-    config.driver = webdriver.Chrome(
+def startBrowserUse():
+    if utils.verifyBrowserIsOpen():
+        driver.maximize_window()
+        driver.delete_all_cookies()
+    else:
+        reopenBrowser()
+
+
+def reopenBrowser():
+    driver = webdriver.Chrome(
         executable_path="chromedriver", chrome_options=chrome_options
     )
-    config.driver.maximize_window()
-
-    config.driver.delete_all_cookies()
+    driver.maximize_window()
 
 
 def openMenu():
@@ -44,7 +49,7 @@ def openMenu():
             menu_select_user()
             menu_OpenTypeRequest()
 
-            openBrowser()
+            startBrowserUse()
             user.OpenRequest()
 
             admin.adminLogin()
@@ -57,19 +62,20 @@ def openMenu():
             menu_select_user()
             menu_OpenTypeRequest()
 
-            openBrowser()
+            startBrowserUse()
             user.OpenRequest()
+            driver.close()  # Não usar na função de abrir e fechar
 
         case 3:
             utils.setManualMode(0)
-            openBrowser()
+            startBrowserUse()
             admin.adminLogin()
             admin.SelectRequestToClose()
             admin.requestClose()
 
         case 4:
             utils.setManualMode(1)
-            openBrowser()
+            startBrowserUse()
             admin.adminLogin()
             admin.SelectRequestToClose()
             admin.requestClose()
@@ -77,7 +83,7 @@ def openMenu():
         case 5:
             utils.setManualMode(1)
             menu_select_user()
-            openBrowser()
+            startBrowserUse()
             user.rateRequest()
 
         case _:
@@ -171,6 +177,7 @@ def menu_OpenTypeRequest():
 
 
 def menuReset():
+    driver.quit()
     inputValue = input("\nSelect an option\n" + "1 - Repetir\n" + "2 - Fechar\n")
     if int(inputValue) == 1:
         openMenu()

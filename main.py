@@ -1,3 +1,3 @@
-import menu
+from menu import openMenu
 
-menu.openMenu()
+openMenu()
