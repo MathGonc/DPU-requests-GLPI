@@ -54,7 +54,6 @@ def OpenRequest():
 
 
 def login():
-    pyautogui.hotkey("win", "down")
     driver.get(config.page.get("login"))
 
     if len(config.userLoginName) == 0:
@@ -140,10 +139,8 @@ def setPageRequest():
             driver.get(config.request_link)
             print("config.request_link: ", config.request_link)
 
-    WebDriverWait(driver, 99999).until(
-        EC.presence_of_element_located((By.ID, "btn-add-servico-and-finish"))
-    )
-    time.sleep(config.sleeptime)
+    utils.waitPageLoadElementAppears()
+    # time.sleep(config.sleeptime)
 
 
 def setRequestInfo():
@@ -236,22 +233,31 @@ def setRequestInfo():
 
     # get request number
     try:
-        getRequestNumber = WebDriverWait(driver, 1000).until(
+        element = WebDriverWait(driver, 99999).until(
+            EC.visibility_of_element_located((By.CLASS_NAME, "panel-body"))
+        )
+        print("painel com informações da abertura detectado")
+
+        element = WebDriverWait(driver, 99999).until(
             EC.presence_of_element_located(
                 (
-                    By.XPATH,
-                    "/html/body/div[6]/div/div/div[2]/div/div/div/div/div/div[1]/h2",
+                    By.CSS_SELECTOR,
+                    "#solicitacoes-criadas-content > div > div > div > div > div > div:nth-child(1) > h2",
                 )
             )
         )
-        getRequestNumber.get_attribute("outerText")
-        config.request_number = getRequestNumber
-        print("Chamado nº" + getRequestNumber + " aberto")
-    except:
-        print("Chamado não aberto")
-        exit()
+        print("numero de chamado detectado")
 
-    time.sleep(config.sleeptime)
+        element.get_attribute("outerText")
+        print(element.get_attribute("outerText"))
+        config.request_number = element.get_attribute("outerText")
+        print("Chamado nº" + config.request_number + " aberto")
+    except Exception as e:
+        print("Chamado não aberto")
+        print(f"Erro: {e}")
+        # exit()
+
+    time.sleep(99999)
 
 
 def userLogout():

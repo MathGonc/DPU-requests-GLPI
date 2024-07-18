@@ -13,7 +13,7 @@ page = {
     "rate": "https://suporte.dpu.def.br/citsmart/pages/smartPortal/smartPortal.load#/my-requests",
 }
 
-sleeptime = 1
+sleeptime = 0
 looptime = 300
 
 # geral

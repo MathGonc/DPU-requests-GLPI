@@ -37,10 +37,18 @@ def alert(string, delay=5):
         print("Erro:", e)
 
 
+def waitPageLoadElementAppears():
+    WebDriverWait(driver, 99999).until(
+        EC.visibility_of_element_located((By.CLASS_NAME, "loading-neuro"))
+    )
+    print("elemento de carregamento visivel")
+
+
 def waitPageBlockElement():
     WebDriverWait(driver, 99999).until(
         EC.invisibility_of_element_located((By.CLASS_NAME, "loading-neuro"))
     )
+    print("elemento de carregamento invisivel")
 
     WebDriverWait(driver, 99999).until(
         EC.invisibility_of_element_located(

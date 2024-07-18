@@ -32,7 +32,7 @@ def adminLogin():
     cookies.loadCookie(cookies.cookieAdminFile)
     driver.get(config.page["admin"])
     WebDriverWait(driver, 99999).until(
-        EC.presence_of_element_located((By.XPATH, xpathPageRequestList))
+        EC.presence_of_element_located((By.NAME, "list-item"))
     )
 
 
