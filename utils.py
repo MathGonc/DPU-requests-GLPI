@@ -4,6 +4,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.alert import Alert
+from selenium.common.exceptions import TimeoutException
 
 import time
 import config
@@ -59,14 +60,16 @@ def waitPageBlockElement():
 
 def verifyPageErrorExist():
     try:
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, f"//span[text()='undefined']"))
-        )
-        print("Error undefined in loading-neuro, reloading...")
-        driver.refresh()
-        return True
-    except:
-        print("loading-neuro show with success")
+        elements = driver.find_elements(By.XPATH, "//span[text()='undefined']")
+        if elements:
+            print("Error undefined in loading-neuro, reloading...")
+            driver.refresh()
+            return True
+        else:
+            print("loading-neuro show with success")
+            return False
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
         return False
 
 

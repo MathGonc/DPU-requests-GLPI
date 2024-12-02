@@ -14,7 +14,7 @@ page = {
 }
 
 sleeptime = 0
-looptime = 300
+looptime = 60
 
 # geral
 needMedia = int(config.get("default", "needMedia"))

@@ -9,6 +9,8 @@ chrome_options.add_argument(f'--app={config.page["home"]}')
 
 chrome_options.add_argument("--start-minimized")
 chrome_options.add_experimental_option("detach", True)  # Dont close
-driver = webdriver.Chrome(executable_path="chromedriver", chrome_options=chrome_options)
+driver = webdriver.Chrome(
+    executable_path="chromedriver", chrome_options=chrome_options
+)  # https://googlechromelabs.github.io/chrome-for-testing/
 # driver.minimize_window()
 pyautogui.hotkey("win", "down")

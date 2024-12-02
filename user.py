@@ -255,9 +255,9 @@ def setRequestInfo():
     except Exception as e:
         print("Chamado não aberto")
         print(f"Erro: {e}")
-        # exit()
+        exit()
 
-    time.sleep(99999)
+    # time.sleep(99999)
 
 
 def userLogout():
