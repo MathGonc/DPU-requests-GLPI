@@ -18,7 +18,7 @@ cookieAdminFile = "admin.pkl"
 
 def saveCookie(custom):
     try:
-        if (
+        if (  # Elemento que diferencia o usuario normal do admin
             len(
                 driver.find_elements(
                     By.XPATH, '// *[ @ id = "header-toolbar-access-system"] / a'
