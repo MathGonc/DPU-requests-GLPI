@@ -19,12 +19,7 @@ cookieAdminFile = "admin.pkl"
 def saveCookie(custom):
     try:
         if (  # Elemento que diferencia o usuario normal do admin
-            len(
-                driver.find_elements(
-                    By.XPATH, '// *[ @ id = "header-toolbar-access-system"] / a'
-                )
-            )
-            > 0
+            len(driver.find_elements(By.XPATH, f"//div[text()='Technician']")) > 0
         ):  # detect if  user is admin
             pickle.dump(driver.get_cookies(), open(pathCookie + cookieAdminFile, "wb"))
             print("Cookie admin file successfully created.")
@@ -46,14 +41,16 @@ def loadCookie(cookieName):
             cookie = pickle.load(open(pathCookie + cookieAdminFile, "rb"))
             for i in cookie:
                 driver.add_cookie(i)
-            driver.get(config.page.get("admin"))
             print("Cookies admin added")
         else:
             cookie = pickle.load(open(pathCookie + cookieName, "rb"))
             for i in cookie:
                 driver.add_cookie(i)
-            driver.get(config.page.get("userOpenRequest"))
             print("Cookies user added")
 
     except Exception as e:
         print(e)
+
+
+def clearCookies():
+    driver.delete_all_cookies()

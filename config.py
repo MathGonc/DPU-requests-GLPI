@@ -6,10 +6,10 @@ config.read("config.ini", encoding="utf-8")
 page = {
     "home": "https://suporte.dpu.def.br/",
     "login": "https://suporte.dpu.def.br/",
-    "logout": "https://suporte.dpu.def.br/citsmart/logout",
-    "admin": "https://suporte.dpu.def.br/citsmart/pages/serviceRequestIncident/serviceRequestIncident.load#/",
+    "logout": "https://suporte.dpu.def.br/front/logout.php?noAUTO=1",
+    "admin": "https://suporte.dpu.def.br/front/central.php",
     "userOpenRequest": "https://suporte.dpu.def.br/citsmart/pages/smartPortal/smartPortal.load",
-    "admin_requestid": "https://suporte.dpu.def.br/citsmart/pages/serviceRequestIncident/serviceRequestIncident.load#/request?idRequest=",
+    "admin_requestid": "https://suporte.dpu.def.br/front/ticket.form.php?id=",
     "rate": "https://suporte.dpu.def.br/citsmart/pages/smartPortal/smartPortal.load#/my-requests",
 }
 

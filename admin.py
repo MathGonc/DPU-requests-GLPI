@@ -1,5 +1,6 @@
 import random
 import os
+import re  # To extract number request
 from configparser import ConfigParser
 
 
@@ -16,6 +17,7 @@ import config
 import menu
 import cookies
 import utils
+import user
 from driver import driver
 
 xpathSolution = "/html/body/div[3]/div/div[2]/div/div[1]/div/form/div/div/div/div/div/div[2]/div/div/div[3]/div[2]/div[6]/div/fieldset/div[4]/div[2]/div/div/citsmart-trix-editor/div/trix-editor"
@@ -32,10 +34,32 @@ xpathPageRequestReview = '//*[@id="service-request-view"]/div/div/div/div[1]/div
 def adminLogin():
     print("adminLogin", adminLogin)
     cookies.loadCookie(cookies.cookieAdminFile)
+
     driver.get(config.page["admin"])
-    WebDriverWait(driver, 99999).until(
-        EC.presence_of_element_located((By.NAME, "list-item"))
-    )
+
+    try:  # Wainting home page loaded
+        element = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable(
+                (
+                    By.CSS_SELECTOR,
+                    "#tabspanel > li:nth-child(2) > a",
+                )
+            )
+        )
+        element.click()
+    except:  # Home page dont loaded, can be cookies error
+        element = driver.find_elements(
+            By.CSS_SELECTOR,
+            "body > div > div > div > div.card.card-md > div > div > div",
+        )
+        if element[0]:
+            print("Cookies error, clearing cookies, please login again...")
+            cookies.clearCookies()
+            user.login()
+        else:  # Reload function
+            print("Reloading admin login...")
+            adminLogin()
+            return
 
 
 def adminFindRequestLoop():
@@ -101,29 +125,90 @@ def compareRequestTextWithFile(requestId, requestText):
 
 
 def SelectRequestToClose():
-    if config.request_manual == 0:
-        time.sleep(config.sleeptime)
-        requestList = driver.find_elements(
-            By.XPATH, "//div[contains(@class, 'request-id ng-binding')]"
+
+    WebDriverWait(driver, 99999).until(
+        EC.presence_of_element_located(
+            (
+                By.XPATH,
+                "//div[@data-itemtype='Reminder']",
+            )
         )
-        print(f"{str(len(requestList))} requests in list")
+    )  # Last Element of my requests page loaded
 
-        if len(requestList) == 0:
-            print("no requests in list, trying again...")
-            time.sleep(config.looptime)
-            requestClose()
-            return
+    # delete tickets awaiting validation, so they don't count towards pending tickets
+    driver.execute_script(
+        """
+    var elements = document.evaluate(
+        '//div[contains(@data-params, "survey")]',
+        document,
+        null,
+        XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,
+        null
+    );
+    for (var i = 0; i < elements.snapshotLength; i++) {
+        elements.snapshotItem(i).remove();
+    }
+"""
+    )
 
-        for r in range(len(requestList)):
-            requestNumber = requestList[r].get_property("innerText")
-            print(requestNumber)
+    if config.request_manual == 0:
+        print("Procurando chamados...")
+        # *** Insert loop
+        element = WebDriverWait(driver, 99999).until(
+            EC.presence_of_element_located(
+                (
+                    By.XPATH,
+                    "//*[contains(@href, '/front/ticket.form.php?id=')]",
+                )
+            )
+        )
+
+        elementRequests = driver.find_elements(
+            By.XPATH,
+            "//*[contains(@href, '/front/ticket.form.php?id=')]",
+        )
+        print(f"Chamados encontrados: {len(elementRequests)}")
+
+        # Requests by category
+        element = WebDriverWait(driver, 99999).until(
+            EC.presence_of_element_located(
+                (
+                    By.CLASS_NAME,
+                    f"count",
+                )
+            )
+        )
+
+        element = driver.find_elements(
+            By.CLASS_NAME,
+            f"count",
+        )
+        time.sleep(1)
+
+        # *** Fix this order ***
+        if element[0]:
+            intRequestsWaitClosed = int(element[0].get_property("innerHTML"))
+            print(f"{intRequestsWaitClosed} chamado(s) para fechar")
+
+        if len(element) >= 2:
+            intRequestsWaitReply = int(element[1].get_property("innerHTML"))
+            print(f"{intRequestsWaitReply} chamado(s) esperando resposta")
+
+        # ************************
+
+        for r in range(len(elementRequests)):
+            elementNumberRequest = elementRequests[r].get_property("search")
+            print(f"Debug: {elementNumberRequest}")
+            requestNumber = re.search(r"id=(\d+)", elementNumberRequest).group(
+                1
+            )  # Example: Extract "479" from "?id=479&forcetab=Ticket$2"
+            print(f"\nAnalisando chamado: {requestNumber}")
 
             elementDescription = driver.find_elements(
-                By.CSS_SELECTOR,
-                f"#list-item-{requestNumber} > div.tableless-td.ellipsis.descricao.ng-binding.ng-hide",
+                By.XPATH,
+                f"//*[contains(@id, 'contentticket{int(requestNumber)}')]",
             )
-            requestText = elementDescription[0].get_property("innerText")
-            requestText = requestText.replace("...", "")
+            requestText = elementDescription[0].get_property("textContent")
 
             foundText = compareRequestTextWithFile(requestNumber, requestText)
             if foundText:
@@ -134,7 +219,7 @@ def SelectRequestToClose():
                     f"request [{requestNumber}] is not automated, looking for another..."
                 )
 
-                if r == (len(requestList) - 1):
+                if r == (len(elementRequests) - 1):
                     config.request_number = requestNumber
                     utils.setManualMode(1)
                     print(
@@ -142,15 +227,73 @@ def SelectRequestToClose():
                     )
 
         print(config.page.get("admin_requestid") + config.request_number)
-        driver.get(config.page.get("admin_requestid") + config.request_number)
-        WebDriverWait(driver, 60).until(
-            EC.presence_of_element_located((By.XPATH, xpathPageRequestReview))
+        driver.get(
+            f"https://suporte.dpu.def.br/front/ticket.form.php?id={config.request_number}&forcetab=Ticket$2"
         )
+        # WebDriverWait(driver, 60).until(
+        #     EC.presence_of_element_located((By.XPATH, xpathPageRequestReview))
+        # )
+
+
+def setStatus():
+
+    # Click in status box
+    WebDriverWait(driver, 99999).until(
+        EC.element_to_be_clickable(
+            (
+                By.CSS_SELECTOR,
+                "#item-main > div > div:nth-child(4) > div > span",
+            )
+        )
+    ).click()
+
+    # Click in solution
+    WebDriverWait(driver, 99999).until(
+        EC.element_to_be_clickable(
+            (
+                By.XPATH,
+                f"//*[text()='Solucionado']",
+            )
+        )
+    ).click()
+
+
+def setLocation():
+    WebDriverWait(driver, 99999).until(
+        EC.element_to_be_clickable(
+            (
+                By.CSS_SELECTOR,
+                "#item-main > div > div:nth-child(10) > div > div > span.select2.select2-container.select2-container--default > span.selection > span > span.select2-selection__arrow",
+            )
+        )
+    ).click()
+
+    actions = ActionChains(driver)
+    actions.send_keys(config.city).perform()
+    time.sleep(1)
+    actions.send_keys(Keys.ENTER).perform()
 
 
 def setTextSolution():
     # Nome
-    nameUser = driver.find_element(By.XPATH, xpathNameUser).text
+    nameUser = driver.find_element(
+        By.CSS_SELECTOR,
+        "#actors > div > div:nth-child(1) > div > span > span.selection > span > ul > li.select2-selection__choice > span.actor_entry > span.actor_text",
+    ).text
+    print(nameUser)
+
+    time.sleep(1)
+    WebDriverWait(driver, 99999).until(
+        EC.presence_of_element_located(
+            (
+                By.CSS_SELECTOR,
+                "#new-ITILSolution-block > div > div.col > div > div > div.clearfix",
+            )
+        )
+    ).click()  # Box solution (for dont need to enter in iframe)
+    ActionChains(driver).send_keys(Keys.TAB).send_keys(Keys.TAB).perform()
+    # driver.switch_to.frame(iframeText)
+
     match (random.randint(0, 2)):
         case 0:
             nameUser = nameUser
@@ -167,20 +310,26 @@ def setTextSolution():
     if random.randint(0, 1) == 0:
         nameUser = "Sr(a) " + nameUser
 
-    # Patrimonio~
+    # Patrimonio
     patrimonio = "N/A"
     try:
-        patrimonioElement = WebDriverWait(driver, 9999).until(
-            EC.presence_of_element_located(
-                (
-                    By.XPATH,
-                    "/html/body/div[3]/div/div[2]/div/div[1]/div/form/div/div/div/div/div/div[2]/div/div/div[3]/div[2]/div[3]/div/fieldset/div/div/div[3]/div[2]/div/div/input",
-                )
-            )
-        )
-        patrimonio = patrimonioElement.get_property("value")
-        config.request_patrimonio = patrimonioElement.get_property("value")
-        print("Patrimonio: " + patrimonio)
+        # patrimonioElement = WebDriverWait(driver, 10).until(
+        #     EC.presence_of_element_located(
+        #         (
+        #             By.CSS_SELECTOR,
+        #             "#itil-object-container > div.row.d-flex.flex-column.alin-items-stretch.itil-object > div.itil-left-side.col-12.col-lg-8.order-last.order-lg-first.pt-2.pe-2.pe-lg-4.d-flex.flex-column-reverse.border-top.border-4 > div > div.timeline-item.mb-3.ITILContent > div > div.col-12.col-sm > div",
+        #         )
+        #     )
+        # )
+
+        # patrimonioText = patrimonioElement.get_property("outerText")
+        # print(patrimonioText)
+        # patrimonio = patrimonioText.split("(Etiqueta branca) : ", 1)[1].strip()
+        # print(patrimonio)
+
+        # # patrimonio = patrimonioElement.get_property("value")
+        # config.request_patrimonio = patrimonio
+        # print("Patrimonio: " + patrimonio)
 
         if patrimonio.isnumeric() == True:
             match (random.randint(0, 2)):
@@ -200,16 +349,15 @@ def setTextSolution():
     except Exception as e:
         print(e)
 
-    WebDriverWait(driver, 60).until(
-        EC.presence_of_element_located((By.XPATH, xpathSolution))
-    )
-    elementSolution = driver.find_element(By.XPATH, xpathSolution)
+    # WebDriverWait(driver, 60).until(
+    #     EC.presence_of_element_located((By.XPATH, xpathSolution))
+    # )
+    # actions = driver.find_element(By.CLASS_NAME, "tox-edit-area__iframe")
 
     # Input solution
-    elementSolution.send_keys("Prezado(a): " + nameUser)
-    elementSolution.send_keys(Keys.ENTER)
-    elementSolution.send_keys("Patrimônio: " + patrimonio)
-    elementSolution.send_keys(Keys.ENTER)
+    actions = ActionChains(driver)
+    actions.send_keys("Usuário(a): " + nameUser)
+    actions.send_keys(Keys.ENTER)
 
     textSolutionPart1 = random.choice(
         ["reportou", "comunicou", "informou", "pediu", "solicitou"]
@@ -231,34 +379,29 @@ def setTextSolution():
         + textSolutionPart5
         + "."
     )
+
     if len(config.request_solution) < 3:
-        elementSolution.send_keys("Descrição de atendimento: " + textSolution)
-        elementSolution.send_keys(Keys.ENTER)
-        elementSolution.send_keys(
-            "Testes executados: Teste realizado na presença do usuário, tudo em funcionamento."
-        )
-        elementSolution.send_keys(Keys.ENTER)
-        elementSolution.send_keys("Evidências: Segue anexo.")
-        elementSolution.send_keys(Keys.ENTER)
-        elementSolution.send_keys(Keys.ENTER)
-        elementSolution.send_keys(
-            "Sua solicitação foi atendida! Pedimos que responda nossa pesquisa de satisfação."
-        )
+        actions.send_keys("Ações realizadas: " + textSolution)
     else:
-        elementSolution.send_keys(
-            "Descrição de atendimento: " + config.request_solution
-        )
-        elementSolution.send_keys(Keys.ENTER)
-        elementSolution.send_keys(
-            "Testes executados: Teste realizado na presença do usuário, tudo em funcionamento."
-        )
-        elementSolution.send_keys(Keys.ENTER)
-        elementSolution.send_keys("Evidências: Segue anexo.")
-        elementSolution.send_keys(Keys.ENTER)
-        elementSolution.send_keys(Keys.ENTER)
-        elementSolution.send_keys(
-            "Sua solicitação foi atendida! Pedimos que responda nossa pesquisa de satisfação."
-        )
+        actions.send_keys("Ações realizadas: " + config.request_solution)
+    actions.send_keys(Keys.ENTER)
+
+    actions.send_keys("Patrimônio: " + patrimonio)
+    actions.send_keys(Keys.ENTER)
+
+    actions.send_keys(
+        "Testes executados: Teste realizado na presença do usuário, tudo em funcionamento."
+    )
+    actions.send_keys(Keys.ENTER)
+    actions.send_keys("Evidência(s): Segue anexo.")
+    actions.send_keys(Keys.ENTER)
+    actions.send_keys(Keys.ENTER)
+    actions.send_keys(
+        "Sua solicitação foi atendida! A sua opinião é muito importante, pedimos que responda nossa pesquisa de satisfação."
+    )
+
+    actions.perform()
+    # driver.switch_to.default_content()  # exit iframe
 
 
 def requestCapture():
@@ -383,154 +526,119 @@ def toggleServiceRequestMenu():
 
 
 def requestClose():
-    time.sleep(config.sleeptime)
-    if utils.verifyPageErrorExist() == True:
-        return requestClose()
-    utils.waitPageBlockElement()
-    time.sleep(config.sleeptime)
+    # time.sleep(config.sleeptime)
+    # if utils.verifyPageErrorExist() == True:
+    #     return requestClose()
+    # utils.waitPageBlockElement()
+    # time.sleep(config.sleeptime)
 
     if config.request_manual == 1:  # Get request number to link in manual mode
         WebDriverWait(driver, 99999).until(
             EC.presence_of_element_located(
                 (
                     By.CSS_SELECTOR,
-                    "#service-request-view > div > div > div > div:nth-child(1) > div > ul > li:nth-child(1) > div.info.pull-left > div:nth-child(2) > div.description.ng-binding",
+                    "#linked_tickets > div > input[type=hidden]",
                 )
             )
         )
         config.request_number = driver.find_element(
             By.CSS_SELECTOR,
-            "#service-request-view > div > div > div > div:nth-child(1) > div > ul > li:nth-child(1) > div.info.pull-left > div:nth-child(2) > div.description.ng-binding",
-        ).get_property("innerText")
+            "#linked_tickets > div > input[type=hidden]",
+        ).get_property("value")
         print("config.request_number: ", config.request_number)
-        time.sleep(config.sleeptime)
 
     # Suspend?
-    xpathReactive = '//*[@id="request-reactivate"]'
-    if len(driver.find_elements(By.XPATH, xpathReactive)) > 0:
+    # xpathReactive = '//*[@id="request-reactivate"]'
+    # if len(driver.find_elements(By.XPATH, xpathReactive)) > 0:
 
-        driver.find_element(By.XPATH, xpathReactive).click()
-        WebDriverWait(driver, 60).until(
-            EC.presence_of_element_located((By.XPATH, xpathPageRequestList))
-        )
+    #     driver.find_element(By.XPATH, xpathReactive).click()
+    #     WebDriverWait(driver, 60).until(
+    #         EC.presence_of_element_located((By.XPATH, xpathPageRequestList))
+    #     )
 
-        driver.get(config.page.get("admin_requestid") + config.request_number)
+    #     driver.get(config.page.get("admin_requestid") + config.request_number)
 
-    requestCapture()
-
-    # Button solution existis
-    element = WebDriverWait(driver, 99999).until(
-        EC.presence_of_element_located((By.ID, "radio-request-resolvida"))
-    )
-    ActionChains(driver).move_to_element(element).perform()
+    # requestCapture()
 
     WebDriverWait(driver, 99999).until(
-        EC.invisibility_of_element_located((By.XPATH, "//div[@class='modal fade']"))
-    )
-
-    time.sleep(config.sleeptime)
-    element.click()
-
-    # Input category cause
-    listClassCause = [
-        "Hardware",
-        "Configuration",
-        "Outros",
-        "Software",
-        "Erro de aplicação",
-        "Erro de configuração",
-    ]
-    config.request_class_cause = listClassCause[
-        random.randint(0, (len(listClassCause) - 1))
-    ]
-
-    causeButton = WebDriverWait(driver, 99999).until(
-        EC.element_to_be_clickable(
-            (By.XPATH, '// *[ @ id = "cause"] / div[1] / span / span[2]')
+        EC.presence_of_element_located(
+            (
+                By.CSS_SELECTOR,
+                "#itil-footer > div > div.col.col-lg-8.ps-3.timeline-buttons.d-flex > div.btn-group.me-2.main-actions > button.btn.btn-primary.dropdown-toggle.dropdown-toggle-split.mb-2",
+            )
         )
-    )
-    causeButton.click()
+    ).click()  # Expand menu solution
 
-    driver.find_element(By.XPATH, '//*[@id="cause"]/input[1]').send_keys(
-        config.request_class_cause
-    )
-    time.sleep(config.sleeptime)
-    ActionChains(driver).send_keys(Keys.RETURN).perform()
-
-    # Input category solution
-    listClassSolution = [
-        "Ajuste na configuração do aplicativo",
-        "Ajustes de configurações do sistema",
-        "Hardware",
-        "Software",
-        "Ajuste de configuração de software",
-    ]
-    config.request_class_solution = listClassSolution[
-        random.randint(0, (len(listClassSolution) - 1))
-    ]
-
-    driver.find_element(
-        By.XPATH, '//*[@id="solution-category"]/div[1]/span/span[2]'
+    WebDriverWait(driver, 99999).until(
+        EC.presence_of_element_located(
+            (
+                By.CSS_SELECTOR,
+                "#itil-footer > div > div.col.col-lg-8.ps-3.timeline-buttons.d-flex > div.btn-group.me-2.main-actions > ul > li:nth-child(2) > a > span",
+            )
+        )
     ).click()
 
-    driver.find_element(By.XPATH, '//*[@id="solution-category"]/input[1]').send_keys(
-        config.request_class_solution
-    )
-    time.sleep(config.sleeptime)
-    ActionChains(driver).send_keys(Keys.RETURN).perform()
-
-    elementRequestNumber = driver.find_element(
-        By.XPATH,
-        '//*[@id="service-request-view"]/div/div/div/div[1]/div/ul/li[1]/div[1]/div[2]/div[2]',
-    )
-    requestNumber = elementRequestNumber.get_property("innerText")
     elementDescription = driver.find_elements(
-        By.XPATH,
-        '//*[@id="service-request-view"]/div/div/div/div[2]/div/div/div[3]/div[2]/div[1]/div/fieldset/div[2]/div/div/div',
+        By.CSS_SELECTOR,
+        "#itil-object-container > div.row.d-flex.flex-column.alin-items-stretch.itil-object > div.itil-left-side.col-12.col-lg-8.order-last.order-lg-first.pt-2.pe-2.pe-lg-4.d-flex.flex-column-reverse.border-top.border-4 > div > div.timeline-item.mb-3.ITILContent > div > div.col-12.col-sm > div",
     )
     if elementDescription:
         requestText = elementDescription[0].get_property("innerText")
         requestText = requestText.replace("\n", "")
         print(requestText)
-        compareRequestTextWithFile(requestNumber, requestText)
+        compareRequestTextWithFile(config.request_number, requestText)
     else:
         print("Texto para comparação não encontrado, inserindo texto genérico...")
 
+    setStatus()
+    setLocation()
     setTextSolution()
 
-    toggleServiceRequestMenu()
-    time.sleep(config.sleeptime)
-    SetIcRelated()
-    time.sleep(config.sleeptime)
-
-    if config.request_manual == 1:  # Manual
-        SetKnowledges(False)
-
-    else:  # Automatico
-        SetKnowledges(True)
-        if config.waitConfirmClose == 0:
-            element = WebDriverWait(driver, 99999).until(
-                EC.element_to_be_clickable(
-                    (By.XPATH, '// *[ @ id = "request-save-submit"]')
+    if config.request_manual == 0:
+        WebDriverWait(driver, 99999).until(  # button add solution
+            EC.presence_of_element_located(
+                (
+                    By.CSS_SELECTOR,
+                    "#new-ITILSolution-block > div > div.col > div > div > div:nth-child(2) > div > form > div.d-flex.card-footer.mx-n3.mb-n3 > button",
                 )
             )
+        ).click()
 
-            WebDriverWait(driver, 99999).until(
-                EC.invisibility_of_element_located(
-                    (By.XPATH, "//div[@class='modal']")
-                )  # modal passado para baixo para dar tempo dele aparecer e desaparecer
-            )
-            time.sleep(5)  # modal dissaper
+    time.sleep(99999)
 
-            element.click()
+    # toggleServiceRequestMenu()
+    # time.sleep(config.sleeptime)
+    # SetIcRelated()
+    # time.sleep(config.sleeptime)
 
-    WebDriverWait(driver, 99999).until(
-        EC.invisibility_of_element_located(
-            (
-                By.XPATH,
-                '// *[ @ id = "request-save-submit"]',
-            )
-        )
-    )
-    time.sleep(config.sleeptime)
+    # if config.request_manual == 1:  # Manual
+    #     SetKnowledges(False)
+
+    # else:  # Automatico
+    #     SetKnowledges(True)
+    #     if config.waitConfirmClose == 0:
+    #         element = WebDriverWait(driver, 99999).until(
+    #             EC.element_to_be_clickable(
+    #                 (By.XPATH, '// *[ @ id = "request-save-submit"]')
+    #             )
+    #         )
+
+    #         WebDriverWait(driver, 99999).until(
+    #             EC.invisibility_of_element_located(
+    #                 (By.XPATH, "//div[@class='modal']")
+    #             )  # modal passado para baixo para dar tempo dele aparecer e desaparecer
+    #         )
+    #         time.sleep(5)  # modal dissaper
+
+    #         element.click()
+
+    # WebDriverWait(driver, 99999).until(
+    #     EC.invisibility_of_element_located(
+    #         (
+    #             By.XPATH,
+    #             '// *[ @ id = "request-save-submit"]',
+    #         )
+    #     )
+    # )
+    # time.sleep(config.sleeptime)
     print("Chamado nº " + config.request_number + " fechado")

@@ -54,19 +54,33 @@ def OpenRequest():
 
 
 def login():
+
     driver.get(config.page.get("login"))
 
-    if len(config.userLoginName) == 0:
-        WebDriverWait(driver, 99999).until(
-            EC.presence_of_element_located(
-                (By.XPATH, "/html/body/nav/div/div[1]/a/img")
+    element = WebDriverWait(driver, 99999).until(  # Expand user menu
+        EC.element_to_be_clickable(
+            (
+                By.CSS_SELECTOR,
+                "body > div.page > header > div > div.ms-md-4.d-none.d-lg-block > div > div.navbar-nav.flex-row.order-md-last.user-menu > div > a",
             )
-        )  # logo dpu
+        )
+    )
+    element.click()
 
-        nameUser = driver.find_element(
-            By.XPATH, '// *[ @ id = "navbar"] / ul / li[4] / a / span[1]'
-        ).text
-        cookies.saveCookie(nameUser.split()[0])
+    nameUser = (
+        WebDriverWait(driver, 99999)
+        .until(
+            EC.presence_of_element_located(
+                (
+                    By.CSS_SELECTOR,
+                    "body > div.page > header > div > div.ms-md-4.d-none.d-lg-block > div > div.navbar-nav.flex-row.order-md-last.user-menu > div > div > h6",
+                )
+            )
+        )
+        .get_property("innerHTML")
+    )
+    print(nameUser)
+    cookies.saveCookie(nameUser.split()[0])
 
 
 def setUserInfo():
