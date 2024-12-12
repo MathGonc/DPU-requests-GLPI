@@ -8,7 +8,7 @@ page = {
     "login": "https://suporte.dpu.def.br/",
     "logout": "https://suporte.dpu.def.br/front/logout.php?noAUTO=1",
     "admin": "https://suporte.dpu.def.br/front/central.php",
-    "userOpenRequest": "https://suporte.dpu.def.br/citsmart/pages/smartPortal/smartPortal.load",
+    "userOpenRequest": "https://suporte.dpu.def.br/front/helpdesk.public.php?create_ticket=1",
     "admin_requestid": "https://suporte.dpu.def.br/front/ticket.form.php?id=",
     "rate": "https://suporte.dpu.def.br/citsmart/pages/smartPortal/smartPortal.load#/my-requests",
 }
@@ -39,10 +39,11 @@ request_path = r"./requests"
 request_manual = 0
 
 # request file
+request_title = ""
 request_patrimonio = ""
 request_link = ""
 request_problem = ""
-request_class_cause = ""
+request_category = ""
 request_class_solution = ""
 request_solution = ""
 request_knowledge = ""

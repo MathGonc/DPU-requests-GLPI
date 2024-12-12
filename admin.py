@@ -112,9 +112,7 @@ def compareRequestTextWithFile(requestId, requestText):
             config.request_patrimonio = configRequest.get(section, "request_patrimonio")
             config.request_link = configRequest.get(section, "request_link")
             config.request_problem = configRequest.get(section, "request_problem")
-            config.request_class_cause = configRequest.get(
-                section, "request_class_cause"
-            )
+            config.request_category = configRequest.get(section, "request_category")
             config.request_class_solution = configRequest.get(
                 section, "request_class_solution"
             )

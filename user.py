@@ -15,7 +15,7 @@ from driver import driver
 
 def rateRequest():
     login()
-    setUserInfo()
+    loadPresetUserInfo()
     driver.get(config.page.get("rate"))
 
     element = WebDriverWait(driver, 99999).until(
@@ -41,15 +41,10 @@ def rateRequest():
 
 
 def OpenRequest():
-    print("login")
+    loadPresetUserInfo()
     login()
-    print("setUserInfo")
-    setUserInfo()
-    print("setPageRequest")
     setPageRequest()
-    print("setRequestInfo")
     setRequestInfo()
-    print("userLogout")
     userLogout()
 
 
@@ -57,7 +52,7 @@ def login():
 
     driver.get(config.page.get("login"))
 
-    element = WebDriverWait(driver, 99999).until(  # Expand user menu
+    element = WebDriverWait(driver, 99999).until(  # Expand user menu to copy name
         EC.element_to_be_clickable(
             (
                 By.CSS_SELECTOR,
@@ -79,11 +74,11 @@ def login():
         )
         .get_property("innerHTML")
     )
-    print(nameUser)
+    print(f"Username: {nameUser}")
     cookies.saveCookie(nameUser.split()[0])
 
 
-def setUserInfo():
+def loadPresetUserInfo():
     time.sleep(config.sleeptime)
 
     if len(config.userLoginName) > 0:
@@ -149,16 +144,102 @@ def setPageRequest():
     time.sleep(config.sleeptime)
 
     if config.request_manual == 0:
-        if len(config.request_link) > 0:
-            driver.get(config.request_link)
-            print("config.request_link: ", config.request_link)
+        driver.get(config.page.get("userOpenRequest"))
+        # if len(config.request_link) > 0:
+        # driver.get(config.request_link)
+        # print("config.request_link: ", config.request_link)
 
-    utils.waitPageLoadElementAppears()
+    # utils.waitPageLoadElementAppears()
     # time.sleep(config.sleeptime)
 
 
 def setRequestInfo():
-    utils.waitPageBlockElement()
+
+    # Category
+    WebDriverWait(driver, 99999).until(
+        EC.element_to_be_clickable(
+            (By.XPATH, "//*[contains(@id, 'select2-dropdown_itilcategories_id')]")
+        )
+    ).click()
+
+    element = WebDriverWait(driver, 99999).until(  # Closest input
+        EC.element_to_be_clickable(
+            (
+                By.CSS_SELECTOR,
+                "body > span > span > span.select2-search.select2-search--dropdown > input",
+            )
+        )
+    )
+    element.send_keys(config.request_category)
+    time.sleep(1)
+    element.send_keys(Keys.ENTER)
+
+    # City
+    WebDriverWait(driver, 99999).until(
+        EC.element_to_be_clickable(
+            (By.XPATH, "//*[contains(@id, 'select2-dropdown_locations_id')]")
+        )
+    ).click()
+
+    element = WebDriverWait(driver, 99999).until(  # Closest input
+        EC.element_to_be_clickable(
+            (
+                By.CSS_SELECTOR,
+                "body > span > span > span.select2-search.select2-search--dropdown > input",
+            )
+        )
+    )
+    element.send_keys(config.city)
+    time.sleep(1)
+    element.send_keys(Keys.ENTER)
+
+    element = WebDriverWait(driver, 99999).until(  # Closest "name_" is title
+        EC.element_to_be_clickable(
+            (
+                By.XPATH,
+                "//*[contains(@id, 'name_')]",
+            )
+        )
+    )
+    element.click()
+    element.send_keys(config.request_title)
+
+    # Text box iframe
+    iframe = driver.find_element(
+        By.XPATH,
+        "//iframe[@title='Área de texto rico']",
+    )
+    driver.switch_to.frame(iframe)
+
+    element = driver.find_element(
+        By.CSS_SELECTOR,
+        "#tinymce",
+    )
+    element.clear()
+
+    element.send_keys("1) Unidade : ")
+    element.send_keys(config.city)
+    element.send_keys(Keys.ENTER)
+    element.send_keys("2) Localidade (Nº da Sala / Setor / Home Office) : ")
+    element.send_keys(config.sala)
+    element.send_keys(Keys.ENTER)
+    element.send_keys("3) Andar : ")
+    element.send_keys(config.andar)
+    element.send_keys(Keys.ENTER)
+    element.send_keys("4) Telefone (Pessoal / Corporativo / Ramal) : ")
+    element.send_keys(config.telefone)
+    element.send_keys(Keys.ENTER)
+    element.send_keys("5) Patrimônio (Etiqueta branca) : ")
+    element.send_keys(config.request_patrimonio)
+    element.send_keys(Keys.ENTER)
+    element.send_keys("6) Descrição : ")
+    element.send_keys(config.request_problem)
+    element.send_keys(Keys.ENTER)
+
+    driver.switch_to.default_content()
+    time.sleep(99999)
+
+    # utils.waitPageBlockElement()
 
     # IF FRAME
     # # WebDriverWait(driver, 99999).until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, '//*[@id="questionario"]')))

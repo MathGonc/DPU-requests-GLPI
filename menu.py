@@ -47,7 +47,7 @@ def openMenu():
     match (int(inputValue)):
         case 1:
             menu_select_user()
-            menu_OpenTypeRequest()
+            menuSelectTypeRequest()
 
             startBrowserUse()
             user.OpenRequest()
@@ -60,7 +60,7 @@ def openMenu():
 
         case 2:
             menu_select_user()
-            menu_OpenTypeRequest()
+            menuSelectTypeRequest()
 
             startBrowserUse()
             user.OpenRequest()
@@ -126,7 +126,7 @@ def menu_select_user():
         exit()
 
 
-def menu_OpenTypeRequest():
+def menuSelectTypeRequest():
     # Carregar o arquivo de configuração
     configRequest = ConfigParser()
     with open("requests.ini", "r", encoding="utf-8") as file:
@@ -153,10 +153,11 @@ def menu_OpenTypeRequest():
         section = configRequest.sections()[inputValue - 1]
         print("\nTipo de chamado:", section)
 
+        config.request_title = section
         config.request_patrimonio = configRequest.get(section, "request_patrimonio")
         config.request_link = configRequest.get(section, "request_link")
         config.request_problem = configRequest.get(section, "request_problem")
-        config.request_class_cause = configRequest.get(section, "request_class_cause")
+        config.request_category = configRequest.get(section, "request_category")
         config.request_class_solution = configRequest.get(
             section, "request_class_solution"
         )
