@@ -31,37 +31,6 @@ xpathPageRequestList = '//*[@id="service-request-incident-container"]/div[1]'
 xpathPageRequestReview = '//*[@id="service-request-view"]/div/div/div/div[1]/div'
 
 
-def adminLogin():
-    print("adminLogin", adminLogin)
-    cookies.loadCookie(cookies.cookieAdminFile)
-
-    driver.get(config.page["admin"])
-
-    try:  # Wainting home page loaded
-        element = WebDriverWait(driver, 5).until(
-            EC.element_to_be_clickable(
-                (
-                    By.CSS_SELECTOR,
-                    "#tabspanel > li:nth-child(2) > a",
-                )
-            )
-        )
-        element.click()
-    except:  # Home page dont loaded, can be cookies error
-        element = driver.find_elements(
-            By.CSS_SELECTOR,
-            "body > div > div > div > div.card.card-md > div > div > div",
-        )
-        if element[0]:
-            print("Cookies error, clearing cookies, please login again...")
-            cookies.clearCookies()
-            user.login()
-        else:  # Reload function
-            print("Reloading admin login...")
-            adminLogin()
-            return
-
-
 def adminFindRequestLoop():
     # driver.find_element(By.XPATH, '/html/body/div[3]/div/div[2]/div/div[1]/div/form/div/div[2]/div[1]/div[2]/button[2]/i').click() #click in refresh and wait
 
@@ -97,13 +66,13 @@ def compareRequestTextWithFile(requestId, requestText):
     with open("requests.ini", "r", encoding="utf-8") as file:
         configRequest.read_file(file)
     sections = list(configRequest.keys())
-    print("\nTexto encontrado no site:\n" + requestText + "\n\n")
+    print("\nTexto encontrado no chamado:\n" + requestText + "\n\n")
     for section in sections:
         if section == "DEFAULT":
             continue  # evitar reconhecer uma solução vazia no requestText
-        if requestText in configRequest.get(section, "request_problem"):
+        if configRequest.get(section, "request_problem") in requestText:
             print(
-                "\nTexto base para comparação:\n"
+                "\nTexto no banco de dados encontrado:\n"
                 + configRequest.get(section, "request_problem")
                 + "\n\n"
             )
@@ -124,6 +93,15 @@ def compareRequestTextWithFile(requestId, requestText):
 
 def SelectRequestToClose():
 
+    element = WebDriverWait(driver, 99999).until(  # Button to open request List
+        EC.element_to_be_clickable(
+            (
+                By.CSS_SELECTOR,
+                "#tabspanel > li:nth-child(2) > a",
+            )
+        )
+    )
+    element.click()
     WebDriverWait(driver, 99999).until(
         EC.presence_of_element_located(
             (
@@ -593,14 +571,15 @@ def requestClose():
     setTextSolution()
 
     if config.request_manual == 0:
-        WebDriverWait(driver, 99999).until(  # button add solution
-            EC.presence_of_element_located(
-                (
-                    By.CSS_SELECTOR,
-                    "#new-ITILSolution-block > div > div.col > div > div > div:nth-child(2) > div > form > div.d-flex.card-footer.mx-n3.mb-n3 > button",
+        if config.waitConfirmClose == 0:
+            WebDriverWait(driver, 99999).until(  # button add solution
+                EC.presence_of_element_located(
+                    (
+                        By.CSS_SELECTOR,
+                        "#new-ITILSolution-block > div > div.col > div > div > div:nth-child(2) > div > form > div.d-flex.card-footer.mx-n3.mb-n3 > button",
+                    )
                 )
-            )
-        ).click()
+            ).click()
 
     time.sleep(99999)
 

@@ -52,7 +52,7 @@ def openMenu():
             startBrowserUse()
             user.OpenRequest()
 
-            admin.adminLogin()
+            user.login(1)
             admin.adminFindRequestLoop()
             admin.verifyRequestExist()
             admin.SelectRequestToClose()
@@ -69,14 +69,14 @@ def openMenu():
         case 3:
             utils.setManualMode(0)
             startBrowserUse()
-            admin.adminLogin()
+            user.login(1)
             admin.SelectRequestToClose()
             admin.requestClose()
 
         case 4:
             utils.setManualMode(1)
             startBrowserUse()
-            admin.adminLogin()
+            user.login(1)
             admin.SelectRequestToClose()
             admin.requestClose()
 

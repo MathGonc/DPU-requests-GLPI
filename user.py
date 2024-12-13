@@ -42,15 +42,33 @@ def rateRequest():
 
 def OpenRequest():
     loadPresetUserInfo()
-    login()
+    login(0)
     setPageRequest()
     setRequestInfo()
     userLogout()
 
 
-def login():
+def login(admin=0):
+    if admin == 1:
+        cookies.loadCookie(cookies.cookieAdminFile)
+        driver.get(config.page["admin"])
+    else:
+        if len(config.userLoginName) > 0:
+            cookies.loadCookie(config.userLoginName + cookies.extension)
+            driver.get(config.page.get("home"))
+        else:
+            print("User not found, please login...")
 
-    driver.get(config.page.get("login"))
+    WebDriverWait(driver, 99999).until(  # Wait login button dissaper
+        EC.invisibility_of_element_located(
+            (
+                By.CSS_SELECTOR,
+                "body > div.page-anonymous > div > div > div.card.card-md > div > form > div > div > div.form-footer > button",
+            )
+        )
+    )
+
+    utils.detectErrorInLogin()
 
     element = WebDriverWait(driver, 99999).until(  # Expand user menu to copy name
         EC.element_to_be_clickable(
@@ -61,7 +79,6 @@ def login():
         )
     )
     element.click()
-
     nameUser = (
         WebDriverWait(driver, 99999)
         .until(
@@ -80,9 +97,6 @@ def login():
 
 def loadPresetUserInfo():
     time.sleep(config.sleeptime)
-
-    if len(config.userLoginName) > 0:
-        cookies.loadCookie(config.userLoginName + cookies.extension)
 
     if config.config.has_section(config.userLoginName):
         config.sala = config.config.get(config.userLoginName, "sala")
@@ -237,6 +251,18 @@ def setRequestInfo():
     element.send_keys(Keys.ENTER)
 
     driver.switch_to.default_content()
+
+    if config.request_manual == 0:
+        if config.waitConfirmOpen == 0:
+            WebDriverWait(driver, 99999).until(  # button send ticket (in user form)
+                EC.presence_of_element_located(
+                    (
+                        By.NAME,
+                        f"add",
+                    )
+                )
+            ).click()
+
     time.sleep(99999)
 
     # utils.waitPageBlockElement()

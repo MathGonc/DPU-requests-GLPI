@@ -33,7 +33,7 @@ def saveCookie(custom):
 def loadCookie(cookieName):
     try:
         time.sleep(config.sleeptime)
-        # driver.get(config.page.get("home"))  # Evitar o erro invalid cookie domain
+        driver.get(config.page.get("home"))  # Evitar o erro invalid cookie domain
 
         if cookieName == cookieAdminFile:
             cookie = pickle.load(open(pathCookie + cookieAdminFile, "rb"))

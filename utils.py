@@ -8,6 +8,8 @@ from selenium.common.exceptions import TimeoutException
 
 import time
 import config
+import cookies
+import user
 from driver import driver
 
 
@@ -79,3 +81,46 @@ def verifyBrowserIsOpen():
         return True
     except:
         return False
+
+
+def detectErrorInLogin():
+
+    try:  # Waiting for home page is loaded
+        WebDriverWait(driver, 5).until(
+            EC.presence_of_element_located(
+                (
+                    By.CLASS_NAME,
+                    "navbar-brand",
+                )
+            )
+        )
+        return 1
+
+    except:  # Home page dont loaded, can be cookies error
+        elementError1 = driver.find_elements(
+            By.CSS_SELECTOR,
+            "body > div > div > div > div.card.card-md > div > div > div",
+        )
+
+        elementError2 = driver.find_elements(
+            By.XPATH, f"//*[text()='ERR_TOO_MANY_REDIRECTS']"
+        )
+
+        if elementError1:
+            print("Cookies error 1, clearing cookies, please login again...")
+            time.sleep(1)
+            cookies.clearCookies()
+            driver.refresh()
+        elif elementError2:
+            print("Cookies error 2, clearing cookies, please login again...")
+            time.sleep(1)
+            cookies.clearCookies()
+            driver.refresh()
+        else:
+            print(
+                "Cookies error 3, User home page dont loaded, clearing cookies, please login again..."
+            )
+            time.sleep(1)
+            cookies.clearCookies()
+            driver.refresh()
+        return 0

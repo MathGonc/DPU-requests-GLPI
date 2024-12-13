@@ -24,6 +24,7 @@ defaultOption = int(config.get("default", "defaultOption"))
 defaultUser = int(config.get("default", "defaultUser"))
 defaultRequest = int(config.get("default", "defaultRequest"))
 defaultPatrimonio = int(config.get("default", "defaultPatrimonio"))
+saveLoginTxt = int(config.get("default", "saveLoginTxt"))
 city = config.get("default", "city")
 
 # user
