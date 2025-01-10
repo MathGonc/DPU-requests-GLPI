@@ -93,43 +93,43 @@ def compareRequestTextWithFile(requestId, requestText):
 
 def SelectRequestToClose():
 
-    element = WebDriverWait(driver, 99999).until(  # Button to open request List
-        EC.element_to_be_clickable(
-            (
-                By.CSS_SELECTOR,
-                "#tabspanel > li:nth-child(2) > a",
-            )
-        )
-    )
-    element.click()
-    WebDriverWait(driver, 99999).until(
-        EC.presence_of_element_located(
-            (
-                By.XPATH,
-                "//div[@data-itemtype='Reminder']",
-            )
-        )
-    )  # Last Element of my requests page loaded
+    # element = WebDriverWait(driver, 99999).until(  # Button to open request List
+    #     EC.element_to_be_clickable(
+    #         (
+    #             By.CSS_SELECTOR,
+    #             "#tabspanel > li:nth-child(2) > a",
+    #         )
+    #     )
+    # )
+    # element.click()
+    # WebDriverWait(driver, 99999).until(
+    #     EC.presence_of_element_located(
+    #         (
+    #             By.XPATH,
+    #             "//div[@data-itemtype='Reminder']",
+    #         )
+    #     )
+    # )  # Last Element of my requests page loaded
 
     # delete tickets awaiting validation, so they don't count towards pending tickets
-    driver.execute_script(
-        """
-    var elements = document.evaluate(
-        '//div[contains(@data-params, "survey")]',
-        document,
-        null,
-        XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,
-        null
-    );
-    for (var i = 0; i < elements.snapshotLength; i++) {
-        elements.snapshotItem(i).remove();
-    }
-"""
-    )
+    #     driver.execute_script(
+    #         """
+    #     var elements = document.evaluate(
+    #         '//div[contains(@data-params, "survey")]',
+    #         document,
+    #         null,
+    #         XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE,
+    #         null
+    #     );
+    #     for (var i = 0; i < elements.snapshotLength; i++) {
+    #         elements.snapshotItem(i).remove();
+    #     }
+    # """
+    #     )
 
     if config.request_manual == 0:
         print("Procurando chamados...")
-        # *** Insert loop
+        # *** TO DO: Insert loop
         element = WebDriverWait(driver, 99999).until(
             EC.presence_of_element_located(
                 (
@@ -146,31 +146,31 @@ def SelectRequestToClose():
         print(f"Chamados encontrados: {len(elementRequests)}")
 
         # Requests by category
-        element = WebDriverWait(driver, 99999).until(
-            EC.presence_of_element_located(
-                (
-                    By.CLASS_NAME,
-                    f"count",
-                )
-            )
-        )
+        # element = WebDriverWait(driver, 99999).until(
+        #     EC.presence_of_element_located(
+        #         (
+        #             By.CLASS_NAME,
+        #             f"count",
+        #         )
+        #     )
+        # )
 
-        element = driver.find_elements(
-            By.CLASS_NAME,
-            f"count",
-        )
-        time.sleep(1)
+        # element = driver.find_elements(
+        #     By.CLASS_NAME,
+        #     f"count",
+        # )
+        # time.sleep(1)
 
-        # *** Fix this order ***
-        if element[0]:
-            intRequestsWaitClosed = int(element[0].get_property("innerHTML"))
-            print(f"{intRequestsWaitClosed} chamado(s) para fechar")
+        # # *** Fix this order ***
+        # if element[0]:
+        #     intRequestsWaitClosed = int(element[0].get_property("innerHTML"))
+        #     print(f"{intRequestsWaitClosed} chamado(s) para fechar")
 
-        if len(element) >= 2:
-            intRequestsWaitReply = int(element[1].get_property("innerHTML"))
-            print(f"{intRequestsWaitReply} chamado(s) esperando resposta")
+        # if len(element) >= 2:
+        #     intRequestsWaitReply = int(element[1].get_property("innerHTML"))
+        #     print(f"{intRequestsWaitReply} chamado(s) esperando resposta")
 
-        # ************************
+        # # ************************
 
         for r in range(len(elementRequests)):
             elementNumberRequest = elementRequests[r].get_property("search")
@@ -180,11 +180,21 @@ def SelectRequestToClose():
             )  # Example: Extract "479" from "?id=479&forcetab=Ticket$2"
             print(f"\nAnalisando chamado: {requestNumber}")
 
-            elementDescription = driver.find_elements(
-                By.XPATH,
-                f"//*[contains(@id, 'contentticket{int(requestNumber)}')]",
+            ActionChains(driver).move_to_element(
+                elementRequests[r]
+            ).perform()  # Move to element for show "qtip-content" class
+
+            elementDescription = WebDriverWait(driver, 99999).until(
+                EC.presence_of_element_located(
+                    (
+                        By.CLASS_NAME,
+                        "qtip-content",
+                    )
+                )
             )
-            requestText = elementDescription[0].get_property("textContent")
+
+            requestText = elementDescription.get_property("textContent")
+            # print(f"Debug:\n{requestText}")
 
             foundText = compareRequestTextWithFile(requestNumber, requestText)
             if foundText:
@@ -206,6 +216,7 @@ def SelectRequestToClose():
         driver.get(
             f"https://suporte.dpu.def.br/front/ticket.form.php?id={config.request_number}&forcetab=Ticket$2"
         )
+
         # WebDriverWait(driver, 60).until(
         #     EC.presence_of_element_located((By.XPATH, xpathPageRequestReview))
         # )

@@ -86,7 +86,7 @@ def verifyBrowserIsOpen():
 def detectErrorInLogin():
 
     try:  # Waiting for home page is loaded
-        WebDriverWait(driver, 5).until(
+        WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(
                 (
                     By.CLASS_NAME,
@@ -111,11 +111,13 @@ def detectErrorInLogin():
             time.sleep(1)
             cookies.clearCookies()
             driver.refresh()
+            detectErrorInLogin()
         elif elementError2:
             print("Cookies error 2, clearing cookies, please login again...")
             time.sleep(1)
             cookies.clearCookies()
             driver.refresh()
+            detectErrorInLogin()
         else:
             print(
                 "Cookies error 3, User home page dont loaded, clearing cookies, please login again..."
@@ -123,4 +125,5 @@ def detectErrorInLogin():
             time.sleep(1)
             cookies.clearCookies()
             driver.refresh()
+            detectErrorInLogin()
         return 0

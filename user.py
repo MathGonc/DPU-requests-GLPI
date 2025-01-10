@@ -176,6 +176,12 @@ def setRequestInfo():
         )
     ).click()
 
+    # WebDriverWait(driver, 99999).until(  # Wait search
+    #     EC.invisibility_of_element_located(
+    #         (By.XPATH, f"//*[contains(text()='Searching...')]")
+    #     )
+    # )
+
     element = WebDriverWait(driver, 99999).until(  # Closest input
         EC.element_to_be_clickable(
             (
@@ -188,12 +194,28 @@ def setRequestInfo():
     time.sleep(1)
     element.send_keys(Keys.ENTER)
 
+    WebDriverWait(driver, 99999).until(  # Wait list dissaper
+        EC.invisibility_of_element_located(
+            (By.CSS_SELECTOR, f"body > span > span > span.select2-results")
+        )
+    )
+
     # City
     WebDriverWait(driver, 99999).until(
         EC.element_to_be_clickable(
             (By.XPATH, "//*[contains(@id, 'select2-dropdown_locations_id')]")
         )
     ).click()
+
+    #     WebDriverWait(driver, 99999).until(  # Wait search
+    #         EC.invisibility_of_element_located(
+    #             (By.XPATH, f"//*[contains(text()='Searching...')]")
+    #         )
+    #     )
+
+    #     Message: invalid selector
+    # from javascript error: {"status":32,"value":"Unable to locate an element with the xpath expression //*[contains(text()='Searching...')] because of the following error:\nSyntaxError: Failed to execute 'evaluate' on 'Document': The string '//*[contains(text()='Searching...')]' is not a valid XPath expression."}
+    #   (Session info: chrome=131.0.6778.205)
 
     element = WebDriverWait(driver, 99999).until(  # Closest input
         EC.element_to_be_clickable(
@@ -206,6 +228,12 @@ def setRequestInfo():
     element.send_keys(config.city)
     time.sleep(1)
     element.send_keys(Keys.ENTER)
+
+    WebDriverWait(driver, 99999).until(  # Wait list dissaper
+        EC.invisibility_of_element_located(
+            (By.CSS_SELECTOR, f"body > span > span > span.select2-results")
+        )
+    )
 
     element = WebDriverWait(driver, 99999).until(  # Closest "name_" is title
         EC.element_to_be_clickable(
