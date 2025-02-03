@@ -12,7 +12,7 @@ import user
 import admin
 import cookies
 import utils
-import password
+import logintxt
 from driver import driver, chrome_options
 
 
@@ -120,7 +120,7 @@ def menu_select_user():
                 if cookies.extension in i:
                     if int(inputValue) == count:
                         config.userLoginName = i.replace(cookies.extension, "")
-                        password.loadUserPass(config.userLoginName)
+                        logintxt.loadUserPass(config.userLoginName)
                         print("user: " + i)
                         return 1
                 count += 1

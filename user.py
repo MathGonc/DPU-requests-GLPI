@@ -10,6 +10,7 @@ import config
 import utils
 import cookies
 import random
+import logintxt
 from driver import driver
 
 
@@ -50,8 +51,14 @@ def OpenRequest():
 
 def login(admin=0):
     if admin == 1:
-        cookies.loadCookie(cookies.cookieAdminFile)
-        driver.get(config.page["admin"])
+        if config.saveLoginTxt == 1:
+            logintxt.loadUserPass("ADMIN")
+            logintxt.inputLogin()
+            driver.get(config.page["admin"])
+        else:
+            # Load via cookies
+            cookies.loadCookie(cookies.cookieAdminFile)
+            driver.get(config.page["admin"])
     else:
         if len(config.userLoginName) > 0:
             cookies.loadCookie(config.userLoginName + cookies.extension)

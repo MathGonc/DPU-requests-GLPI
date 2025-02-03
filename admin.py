@@ -266,8 +266,9 @@ def setTextSolution():
     nameUser = driver.find_element(
         By.CSS_SELECTOR,
         "#actors > div > div:nth-child(1) > div > span > span.selection > span > ul > li.select2-selection__choice > span.actor_entry > span.actor_text",
-    ).text
-    print(nameUser)
+    ).get_property("innerHTML")
+
+    print(f"nameUser: {nameUser}")
 
     time.sleep(1)
     WebDriverWait(driver, 99999).until(
