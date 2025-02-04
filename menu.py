@@ -35,6 +35,7 @@ def openMenu():
     if config.defaultOption == 0:
         inputValue = input(
             "\nSelect an option\n"
+            + "0 - Visualizar chamados (admin)\n"
             + "1 - Abrir & Fechar\n"
             + "2 - Abrir\n"
             + "3 - Fechar (automatico)\n"
@@ -46,6 +47,11 @@ def openMenu():
         inputValue = config.defaultOption
 
     match (int(inputValue)):
+        case 0:
+            utils.setManualMode(0)
+            startBrowserUse()
+            user.login(1)
+            time.sleep(99999)
         case 1:
             menu_select_user()
             menuSelectTypeRequest()
@@ -119,9 +125,10 @@ def menu_select_user():
             for i in file:
                 if cookies.extension in i:
                     if int(inputValue) == count:
-                        config.userLoginName = i.replace(cookies.extension, "")
-                        logintxt.loadUserPass(config.userLoginName)
-                        print("user: " + i)
+                        config.userName = i.replace(cookies.extension, "")
+                        if config.saveLoginTxt == 1:
+                            logintxt.loadUserPass(config.userName)
+                        print("user: " + config.userName)
                         return 1
                 count += 1
         print("user dont exists, exiting...")

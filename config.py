@@ -30,6 +30,7 @@ city = config.get("default", "city")
 # user
 userLoginName = ""
 userLoginPass = ""
+userName = ""
 sala = 0
 andar = ""
 telefone = ""

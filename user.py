@@ -50,21 +50,28 @@ def OpenRequest():
 
 
 def login(admin=0):
-    if admin == 1:
-        if config.saveLoginTxt == 1:
+
+    if config.saveLoginTxt == 1:
+        if admin == 1:
             logintxt.loadUserPass("ADMIN")
             logintxt.inputLogin()
             driver.get(config.page["admin"])
-        else:
-            # Load via cookies
-            cookies.loadCookie(cookies.cookieAdminFile)
-            driver.get(config.page["admin"])
-    else:
-        if len(config.userLoginName) > 0:
-            cookies.loadCookie(config.userLoginName + cookies.extension)
+        elif len(config.userName) > 0:
+            logintxt.loadUserPass(config.userName)
+            logintxt.inputLogin()
             driver.get(config.page.get("home"))
         else:
-            print("User not found, please login...")
+            logintxt.inputUserPass()
+    else:  # Load via cookies
+        if admin == 1:
+            cookies.loadCookie(cookies.cookieAdminFile)
+            driver.get(config.page["admin"])
+        else:
+            if len(config.userName) > 0:
+                cookies.loadCookie(config.userName + cookies.extension)
+                driver.get(config.page.get("home"))
+            else:
+                print("User not found, please login...")
 
     WebDriverWait(driver, 99999).until(  # Wait login button dissaper
         EC.invisibility_of_element_located(
@@ -98,16 +105,19 @@ def login(admin=0):
         )
         .get_property("innerHTML")
     )
-    print(f"Username: {nameUser}")
-    cookies.saveCookie(nameUser.split()[0])
+    config.userName = nameUser.split()[0]
+    print(f"Username: {config.userName}")
+    cookies.saveCookie(config.userName)
+    if config.saveLoginTxt == 1:
+        logintxt.saveUserPass(config.userName)
 
 
 def loadPresetUserInfo():
     time.sleep(config.sleeptime)
 
-    if config.config.has_section(config.userLoginName):
-        config.sala = config.config.get(config.userLoginName, "sala")
-        config.telefone = int(config.config.get(config.userLoginName, "telefone"))
+    if config.config.has_section(config.userName):
+        config.sala = config.config.get(config.userName, "sala")
+        config.telefone = int(config.config.get(config.userName, "telefone"))
 
     if config.sala == 0:
         salas_list = [1, 5, 6, 12, 13, 14, 15, 16, 17, 18, 19]
