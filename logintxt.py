@@ -36,71 +36,99 @@ def loadUserPass(name):
 
 
 def inputLogin():
-    print("Input login")
-    time.sleep(3)
-    element = WebDriverWait(driver, 99999).until(
-        EC.element_to_be_clickable(
-            (
-                By.CSS_SELECTOR,
-                "#login_name",
-            )
-        )
-    )
-    element.send_keys(config.userLoginName)
+    while True:
 
-    element = WebDriverWait(driver, 99999).until(
-        EC.element_to_be_clickable(
-            (
-                By.CSS_SELECTOR,
-                "#login_password",
-            )
-        )
-    )
-    element.send_keys(config.userLoginPass)
+        if verifyErrors() == 2:
+            return
 
-    element = WebDriverWait(driver, 99999).until(
-        EC.element_to_be_clickable(
-            (
-                By.CSS_SELECTOR,
-                "body > div.page-anonymous > div > div > div.card.card-md > div > form > div > div > div.form-footer > button",
+        print("Inputing...")
+        element = WebDriverWait(driver, 99999).until(
+            EC.element_to_be_clickable(
+                (
+                    By.CSS_SELECTOR,
+                    "#login_name",
+                )
             )
         )
-    )
-    element.click()
+        element.send_keys(config.userLoginName)
 
-    # Verify error and try again
-    WebDriverWait(driver, 99999).until(  # Wait login button dissaper
-        EC.invisibility_of_element_located(
-            (
-                By.CSS_SELECTOR,
-                "body > div.page-anonymous > div > div > div.card.card-md > div > form > div > div > div.form-footer > button",
+        element = WebDriverWait(driver, 99999).until(
+            EC.element_to_be_clickable(
+                (
+                    By.CSS_SELECTOR,
+                    "#login_password",
+                )
             )
         )
+        element.send_keys(config.userLoginPass)
+
+        element = WebDriverWait(driver, 99999).until(
+            EC.element_to_be_clickable(
+                (
+                    By.CSS_SELECTOR,
+                    "body > div.page-anonymous > div > div > div.card.card-md > div > form > div > div > div.form-footer > button",
+                )
+            )
+        )
+        element.click()
+
+        # Verify error and try again
+        WebDriverWait(driver, 99999).until(  # Wait login button dissaper
+            EC.invisibility_of_element_located(
+                (
+                    By.CSS_SELECTOR,
+                    "body > div.page-anonymous > div > div > div.card.card-md > div > form > div > div > div.form-footer > button",
+                )
+            )
+        )
+
+        time.sleep(3)
+
+        if verifyErrors() == 2:
+            return
+        else:
+            continue
+
+
+def verifyErrors():
+    # Success login
+    element = driver.find_elements(
+        By.CSS_SELECTOR, f"body > div.page > aside > div > a > span"
     )
-    time.sleep(1)
+    if element:
+        print("Not error: Success login")
+        saveUserPass(config.userName)
+        return 2
 
     # Error 1
     element = driver.find_elements(By.XPATH, f"//*[text()='Login ou senha vazios']")
     if element:
-        print("Error username and password empty")
+        print("Error 1: username and password empty")
         driver.get(config.page.get("home"))
-        return inputUserPass()
+        inputUserPass()
+        return 0
 
     # Error 2
     element = driver.find_elements(
-        By.XPATH, f"//*[text()='Nome de usuário ou senha inválidos']"
+        By.CSS_SELECTOR,
+        f"body > div > div > div > div.card.card-md > div > div > div > div:nth-child(2) > div",
     )
     if element:
-        print("Error password")
-        driver.get(config.page.get("home"))
-        return inputUserPass()
+        if (
+            element[0].get_property("innerText")
+            == "Nome de usuário ou senha inválidos\n"
+        ):
+            print("Error 2: password or user")
+            driver.get(config.page.get("home"))
+            inputUserPass()
+            return 0
 
     # Error 3
     element = driver.find_elements(By.XPATH, f"//*[text()='Return to previous page']")
     if element:
-        print("Error login page")
+        print("Error 3: login page")
         driver.get(config.page.get("home"))
-        return inputLogin()
+        return 0
 
     return 1
 
@@ -112,7 +140,6 @@ def inputUserPass():
     )
 
     print(f"usuário: {config.userLoginName}, senha: {config.userLoginPass}")
-    inputLogin()
     return 1
 
 
