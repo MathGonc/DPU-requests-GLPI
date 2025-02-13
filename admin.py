@@ -234,6 +234,8 @@ def setStatus():
         )
     ).click()
 
+    time.sleep(1)
+
     # Click in solution
     WebDriverWait(driver, 99999).until(
         EC.element_to_be_clickable(
@@ -244,17 +246,26 @@ def setStatus():
         )
     ).click()
 
-
-def setLocation():
     WebDriverWait(driver, 99999).until(
         EC.element_to_be_clickable(
             (
                 By.CSS_SELECTOR,
-                "#item-main > div > div:nth-child(10) > div > div > span.select2.select2-container.select2-container--default > span.selection > span > span.select2-selection__arrow",
+                f"#page > div > div > div.col > div.navigationheader.justify-content-sm-between > h3",
             )
         )
     ).click()
 
+
+def setLocation():
+    element = WebDriverWait(driver, 99999).until(
+        EC.element_to_be_clickable(
+            (
+                By.CSS_SELECTOR,
+                "#item-main > div > div:nth-child(8) > div > div > span.select2.select2-container.select2-container--default > span.selection > span",
+            )
+        )
+    )
+    element.click()
     actions = ActionChains(driver)
     actions.send_keys(config.city).perform()
     time.sleep(1)
@@ -272,7 +283,7 @@ def setTextSolution():
 
     time.sleep(1)
     WebDriverWait(driver, 99999).until(
-        EC.presence_of_element_located(
+        EC.element_to_be_clickable(
             (
                 By.CSS_SELECTOR,
                 "#new-ITILSolution-block > div > div.col > div > div > div.clearfix",
@@ -459,58 +470,133 @@ def SetIcRelated():
 
 def SetKnowledges(auto):
 
-    element = driver.find_element(By.ID, "nav-item-service-request-knowledges")
-    element.click()
-    time.sleep(config.sleeptime)
-
-    elementText = driver.find_elements(
-        By.XPATH, f"//*[text()='Nenhum registro encontrado!']"
+    element = driver.find_elements(
+        By.XPATH,
+        "//a[contains(@title, 'Base de Conhecimento')]//span[@class='badge' and text()='1']",
     )
-    if len(elementText) == 0:
-        utils.alert(f"Documento já anexado")
-        ActionChains(driver).send_keys(Keys.ESCAPE).perform()
-        time.sleep(config.sleeptime)
+    if element:
+        print("Knowledge already inserted")
         return
 
-    button = driver.find_element(
-        By.XPATH, f"//button[text()='Pesquisa de Conhecimentos']"
-    )
-    button.click()
-    time.sleep(config.sleeptime)
-
-    if len(config.request_knowledge) <= 1:
-        utils.alert(f"Modo manual - nome do documento não encontrado automaticamente")
-        return
-
-    if auto == True:
-        element = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.ID, "lookup-input-Título"))
+    element = WebDriverWait(driver, 99999).until(
+        EC.presence_of_element_located(
+            (By.CSS_SELECTOR, "#tabspanel > li:nth-child(4) > a")
         )
-        element.send_keys(config.request_knowledge)
-        time.sleep(config.sleeptime)
-
-        button = driver.find_element(By.XPATH, f"//button[text()='Buscar']")
-        button.click()
-        time.sleep(config.sleeptime)
-
-        element = driver.find_elements(By.ID, "lookup-item-0")
-        if len(element) >= 1:
-            element[0].click()
-            time.sleep(config.sleeptime)
-            print("231232132132132")
-        else:
-            utils.alert("Nenhum documento encontrado")
-            print("999999999999999999999999999999999")
-            return
-
-        ActionChains(driver).send_keys(Keys.ESCAPE).perform()
-        time.sleep(config.sleeptime)
-        toggleServiceRequestMenu()
-
-
-def toggleServiceRequestMenu():
-    element = driver.find_element(By.CLASS_NAME, "service-request-menu-toggle")
+    )
     element.click()
+
+    while True:
+        element = WebDriverWait(driver, 99999).until(
+            EC.element_to_be_clickable(
+                (By.XPATH, "//*[contains(@id, 'select2-dropdown_knowbaseitems_id')]")
+            )
+        )
+        element.click()
+
+        elementInput = WebDriverWait(driver, 99999).until(
+            EC.presence_of_element_located(
+                (
+                    By.CSS_SELECTOR,
+                    "body > span > span > span.select2-search.select2-search--dropdown > input",
+                )
+            )
+        )
+
+        if config.request_knowledge:
+            elementInput.send_keys(config.request_knowledge)
+            time.sleep(1)
+
+            # WebDriverWait(driver, 99999).until(  # Wait search
+            #     EC.invisibility_of_element(
+            #         (By.XPATH, f"//*[contains(text()='Searching...')]")
+            #     )
+            # )
+            # time.sleep(1)
+
+            element = driver.find_elements(
+                By.XPATH, "//li[contains(text(), 'No results found')]"
+            )
+            if element:
+                print("Nenhum conhecimento encontrado, aguardando para continuar...")
+                element = WebDriverWait(driver, 99999).until(
+                    EC.presence_of_element_located(
+                        (
+                            By.XPATH,
+                            "//a[contains(@title, 'Base de Conhecimento')]//span[@class='badge' and text()='1']",
+                        )
+                    )
+                )
+            else:
+                elementInput.send_keys(Keys.ENTER)
+                # time.sleep(1)
+                # element = driver.find_elements(
+                #     By.XPATH,
+                #     "//*[contains(@id, 'select2-dropdown_knowbaseitems_id') and not(@title='-----')]",
+                # )
+                # if element:
+                #     print("ERROR: Knowledge dont insert...")
+                # else:
+                #     print("Knowledge sucessful insert")
+
+                element = WebDriverWait(driver, 99999).until(
+                    EC.element_to_be_clickable(
+                        (
+                            By.XPATH,
+                            "//input[contains(@value, 'Adicionar')]",
+                        )
+                    )
+                )
+                element.click()
+
+                element = WebDriverWait(driver, 99999).until(
+                    EC.invisibility_of_element(
+                        (
+                            By.XPATH,
+                            "//input[contains(@value, 'Adicionar')]",
+                        )
+                    )
+                )
+
+                time.sleep(1)
+                element = driver.find_elements(
+                    By.XPATH,
+                    "//div[contains(text(), 'Item adicionado com sucesso: Item da base de conhecimento')]",
+                )
+
+                if element:
+                    print("Knowledge sucessful")
+                else:
+                    element = driver.find_elements(
+                        By.XPATH, "//a[contains(@href, 'Return to previous page')]"
+                    )
+                    if element:
+                        print(
+                            "ERROR: Button 'Adicionar' has been pressed with input field empty, manual mode..."
+                        )
+                        element[0].click()
+                        continue
+
+        else:
+            print("Nenhum conhecimento vinculado, aguardando para continuar...")
+            element = WebDriverWait(driver, 99999).until(
+                EC.presence_of_element_located(
+                    (
+                        By.XPATH,
+                        "//a[contains(@title, 'Base de Conhecimento')]//span[@class='badge' and text()='1']",
+                    )
+                )
+            )
+
+        element = WebDriverWait(driver, 99999).until(
+            EC.element_to_be_clickable(
+                (
+                    By.CSS_SELECTOR,
+                    "#tabspanel > li:nth-child(1) > a",
+                )
+            )
+        )
+        element.click()
+        return
 
 
 def requestClose():
@@ -578,7 +664,8 @@ def requestClose():
     else:
         print("Texto para comparação não encontrado, inserindo texto genérico...")
 
-    setStatus()
+    # setStatus() # Dont need set solution, because button add solution already set this status
+    SetKnowledges(1)
     setLocation()
     setTextSolution()
 

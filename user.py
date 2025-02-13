@@ -52,6 +52,7 @@ def OpenRequest():
 def login(admin=0):
 
     if config.saveLoginTxt == 1:
+        driver.refresh()
         if admin == 1:
             logintxt.loadUserPass("ADMIN")
             logintxt.inputLogin()

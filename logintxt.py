@@ -82,7 +82,7 @@ def inputLogin():
             )
         )
 
-        time.sleep(3)
+        time.sleep(1)
 
         if verifyErrors() == 2:
             return
@@ -97,7 +97,7 @@ def verifyErrors():
     )
     if element:
         print("Not error: Success login")
-        saveUserPass(config.userName)
+        # saveUserPass(config.userName) # If login is sucess, dont need save the same password again
         return 2
 
     # Error 1
@@ -144,6 +144,11 @@ def inputUserPass():
 
 
 def saveUserPass(name):
+
+    if not name:
+        print("Error, name dont exist in save pass function, exiting...")
+        exit()
+        return
 
     if not loginParser.has_section(name):
         loginParser.add_section(name)
