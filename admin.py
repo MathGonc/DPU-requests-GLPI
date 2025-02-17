@@ -31,33 +31,6 @@ xpathPageRequestList = '//*[@id="service-request-incident-container"]/div[1]'
 xpathPageRequestReview = '//*[@id="service-request-view"]/div/div/div/div[1]/div'
 
 
-def adminFindRequestLoop():
-    # driver.find_element(By.XPATH, '/html/body/div[3]/div/div[2]/div/div[1]/div/form/div/div[2]/div[1]/div[2]/button[2]/i').click() #click in refresh and wait
-
-    requestItem = "list-item-" + config.request_number
-    if len(driver.find_elements(By.ID, requestItem)) > 0:
-        print(f"Chamado {config.request_number} encontrado na fila")
-    else:
-        print(
-            f"Chamado {config.request_number} não encontrado na fila, tentando novamente..."
-        )
-        time.sleep(config.looptime)
-        adminFindRequestLoop()
-
-
-def verifyRequestExist():
-    requestItem = "list-item-" + str(config.request_number)
-    if len(driver.find_elements(By.ID, requestItem)) > 0:
-        print(f"Chamado {config.request_number} encontrado")
-        return 1
-
-    else:
-        print(f"Chamado {config.request_number} não encontrado, tentando novamente...")
-        time.sleep(config.looptime)
-        verifyRequestExist()
-        return 0
-
-
 def compareRequestTextWithFile(requestId, requestText):
     print(f"Comparando descrição do chamado nº {requestId}")
     time.sleep(config.sleeptime)
@@ -145,33 +118,7 @@ def SelectRequestToClose():
         )
         print(f"Chamados encontrados: {len(elementRequests)}")
 
-        # Requests by category
-        # element = WebDriverWait(driver, 99999).until(
-        #     EC.presence_of_element_located(
-        #         (
-        #             By.CLASS_NAME,
-        #             f"count",
-        #         )
-        #     )
-        # )
-
-        # element = driver.find_elements(
-        #     By.CLASS_NAME,
-        #     f"count",
-        # )
-        # time.sleep(1)
-
-        # # *** Fix this order ***
-        # if element[0]:
-        #     intRequestsWaitClosed = int(element[0].get_property("innerHTML"))
-        #     print(f"{intRequestsWaitClosed} chamado(s) para fechar")
-
-        # if len(element) >= 2:
-        #     intRequestsWaitReply = int(element[1].get_property("innerHTML"))
-        #     print(f"{intRequestsWaitReply} chamado(s) esperando resposta")
-
-        # # ************************
-
+        # FIX ITTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT
         for r in range(len(elementRequests)):
             elementNumberRequest = elementRequests[r].get_property("search")
             print(f"Debug: {elementNumberRequest}")
@@ -271,15 +218,47 @@ def setLocation():
     time.sleep(1)
     actions.send_keys(Keys.ENTER).perform()
 
+    WebDriverWait(driver, 99999).until(
+        EC.element_to_be_clickable(
+            (
+                By.XPATH,
+                "//button[contains(@title, 'Salvar')]",
+            )
+        )
+    ).click()
+
 
 def setTextSolution():
-    # Nome
-    nameUser = driver.find_element(
-        By.CSS_SELECTOR,
-        "#actors > div > div:nth-child(1) > div > span > span.selection > span > ul > li.select2-selection__choice > span.actor_entry > span.actor_text",
-    ).get_property("innerHTML")
-
+    # User name
+    element = WebDriverWait(driver, 99999).until(
+        EC.presence_of_element_located(
+            (
+                By.CSS_SELECTOR,
+                "#actors > div > div:nth-child(1) > div > span > span.selection > span > ul > li.select2-selection__choice > span.actor_entry > span.actor_text",
+            )
+        )
+    )
+    nameUser = element.get_property("innerHTML")
     print(f"nameUser: {nameUser}")
+
+    # Solution
+    WebDriverWait(driver, 99999).until(
+        EC.presence_of_element_located(
+            (
+                By.CSS_SELECTOR,
+                "#itil-footer > div > div.col.col-lg-8.ps-3.timeline-buttons.d-flex > div.btn-group.me-2.main-actions > button.btn.btn-primary.dropdown-toggle.dropdown-toggle-split.mb-2",
+            )
+        )
+    ).click()  # Expand menu solution
+
+    WebDriverWait(driver, 99999).until(
+        EC.presence_of_element_located(
+            (
+                By.CSS_SELECTOR,
+                "#itil-footer > div > div.col.col-lg-8.ps-3.timeline-buttons.d-flex > div.btn-group.me-2.main-actions > ul > li:nth-child(2) > a > span",
+            )
+        )
+    ).click()
 
     time.sleep(1)
     WebDriverWait(driver, 99999).until(
@@ -578,14 +557,15 @@ def SetKnowledges(auto):
 
         else:
             print("Nenhum conhecimento vinculado, aguardando para continuar...")
-            element = WebDriverWait(driver, 99999).until(
-                EC.presence_of_element_located(
-                    (
-                        By.XPATH,
-                        "//a[contains(@title, 'Base de Conhecimento')]//span[@class='badge' and text()='1']",
-                    )
+
+        element = WebDriverWait(driver, 99999).until(
+            EC.presence_of_element_located(
+                (
+                    By.XPATH,
+                    "//a[contains(@title, 'Base de Conhecimento')]//span[@class='badge' and text()='1']",
                 )
             )
+        )
 
         element = WebDriverWait(driver, 99999).until(
             EC.element_to_be_clickable(
@@ -634,24 +614,6 @@ def requestClose():
 
     # requestCapture()
 
-    WebDriverWait(driver, 99999).until(
-        EC.presence_of_element_located(
-            (
-                By.CSS_SELECTOR,
-                "#itil-footer > div > div.col.col-lg-8.ps-3.timeline-buttons.d-flex > div.btn-group.me-2.main-actions > button.btn.btn-primary.dropdown-toggle.dropdown-toggle-split.mb-2",
-            )
-        )
-    ).click()  # Expand menu solution
-
-    WebDriverWait(driver, 99999).until(
-        EC.presence_of_element_located(
-            (
-                By.CSS_SELECTOR,
-                "#itil-footer > div > div.col.col-lg-8.ps-3.timeline-buttons.d-flex > div.btn-group.me-2.main-actions > ul > li:nth-child(2) > a > span",
-            )
-        )
-    ).click()
-
     elementDescription = driver.find_elements(
         By.CSS_SELECTOR,
         "#itil-object-container > div.row.d-flex.flex-column.alin-items-stretch.itil-object > div.itil-left-side.col-12.col-lg-8.order-last.order-lg-first.pt-2.pe-2.pe-lg-4.d-flex.flex-column-reverse.border-top.border-4 > div > div.timeline-item.mb-3.ITILContent > div > div.col-12.col-sm > div",
@@ -669,52 +631,67 @@ def requestClose():
     setLocation()
     setTextSolution()
 
-    if config.request_manual == 0:
-        if config.waitConfirmClose == 0:
-            WebDriverWait(driver, 99999).until(  # button add solution
-                EC.presence_of_element_located(
+    print("config.request_manual: ", config.request_manual)
+    print("config.waitConfirmClose: ", config.waitConfirmClose)
+    if config.request_manual == 1:  # TEMP
+        if config.waitConfirmClose == 1:  # TEMP
+            WebDriverWait(driver, 99999).until(  # FIX ITTTTT
+                EC.element_to_be_clickable(
                     (
-                        By.CSS_SELECTOR,
-                        "#new-ITILSolution-block > div > div.col > div > div > div:nth-child(2) > div > form > div.d-flex.card-footer.mx-n3.mb-n3 > button",
+                        By.XPATH,
+                        "//button[@name='add']",
                     )
                 )
             ).click()
 
-    time.sleep(99999)
+            WebDriverWait(driver, 99999).until(
+                EC.presence_of_element_located(
+                    (
+                        By.XPATH,
+                        "//div[contains(text(), 'Item adicionado com sucesso')]",
+                    )
+                )
+            )
 
-    # toggleServiceRequestMenu()
-    # time.sleep(config.sleeptime)
-    # SetIcRelated()
-    # time.sleep(config.sleeptime)
+            # Click in status box
+            WebDriverWait(driver, 99999).until(
+                EC.element_to_be_clickable(
+                    (
+                        By.CSS_SELECTOR,
+                        "#item-main > div > div:nth-child(4) > div > span",
+                    )
+                )
+            ).click()
 
-    # if config.request_manual == 1:  # Manual
-    #     SetKnowledges(False)
+            time.sleep(1)
 
-    # else:  # Automatico
-    #     SetKnowledges(True)
-    #     if config.waitConfirmClose == 0:
-    #         element = WebDriverWait(driver, 99999).until(
-    #             EC.element_to_be_clickable(
-    #                 (By.XPATH, '// *[ @ id = "request-save-submit"]')
-    #             )
-    #         )
+            # Click in solution
+            WebDriverWait(driver, 99999).until(
+                EC.element_to_be_clickable(
+                    (
+                        By.XPATH,
+                        f"//*[text()='Fechado']",
+                    )
+                )
+            ).click()
 
-    #         WebDriverWait(driver, 99999).until(
-    #             EC.invisibility_of_element_located(
-    #                 (By.XPATH, "//div[@class='modal']")
-    #             )  # modal passado para baixo para dar tempo dele aparecer e desaparecer
-    #         )
-    #         time.sleep(5)  # modal dissaper
+            WebDriverWait(driver, 99999).until(
+                EC.element_to_be_clickable(
+                    (
+                        By.XPATH,
+                        "//button[contains(@title, 'Salvar')]",
+                    )
+                )
+            ).click()
 
-    #         element.click()
+            WebDriverWait(driver, 99999).until(
+                EC.presence_of_element_located(
+                    (
+                        By.XPATH,
+                        "//div[contains(text(), 'Item atualizado com sucesso')]",
+                    )
+                )
+            )
 
-    # WebDriverWait(driver, 99999).until(
-    #     EC.invisibility_of_element_located(
-    #         (
-    #             By.XPATH,
-    #             '// *[ @ id = "request-save-submit"]',
-    #         )
-    #     )
-    # )
-    # time.sleep(config.sleeptime)
     print("Chamado nº " + config.request_number + " fechado")
+    time.sleep(99999)

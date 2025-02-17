@@ -56,7 +56,7 @@ def login(admin=0):
         if admin == 1:
             logintxt.loadUserPass("ADMIN")
             logintxt.inputLogin()
-            driver.get(config.page["admin"])
+            driver.get(config.page["adminRequestList"])
         elif len(config.userName) > 0:
             logintxt.loadUserPass(config.userName)
             logintxt.inputLogin()
@@ -66,7 +66,7 @@ def login(admin=0):
     else:  # Load via cookies
         if admin == 1:
             cookies.loadCookie(cookies.cookieAdminFile)
-            driver.get(config.page["admin"])
+            driver.get(config.page["adminRequestList"])
         else:
             if len(config.userName) > 0:
                 cookies.loadCookie(config.userName + cookies.extension)
@@ -176,255 +176,244 @@ def setPageRequest():
     time.sleep(config.sleeptime)
 
     if config.request_manual == 0:
-        driver.get(config.page.get("userOpenRequest"))
-        # if len(config.request_link) > 0:
-        # driver.get(config.request_link)
-        # print("config.request_link: ", config.request_link)
+
+        print("config.request_link: ", config.request_link)
+        if not len(config.request_link):
+            driver.get(config.page.get("createRequestUserPanel"))
+        else:
+            driver.get(config.request_link)
 
     # utils.waitPageLoadElementAppears()
     # time.sleep(config.sleeptime)
 
 
-def setRequestInfo():
+def setRequestInfo(tec=0):
 
-    # Category
-    WebDriverWait(driver, 99999).until(
-        EC.element_to_be_clickable(
-            (By.XPATH, "//*[contains(@id, 'select2-dropdown_itilcategories_id')]")
-        )
-    ).click()
+    # In this moment, only tec=0 is called
+    # There are 2 call forms, 1 for technicians and 1 for users
 
-    # WebDriverWait(driver, 99999).until(  # Wait search
-    #     EC.invisibility_of_element_located(
-    #         (By.XPATH, f"//*[contains(text()='Searching...')]")
-    #     )
-    # )
-
-    element = WebDriverWait(driver, 99999).until(  # Closest input
-        EC.element_to_be_clickable(
-            (
-                By.CSS_SELECTOR,
-                "body > span > span > span.select2-search.select2-search--dropdown > input",
+    if tec == 1:
+        # ----- Category
+        WebDriverWait(driver, 99999).until(
+            EC.element_to_be_clickable(
+                (By.XPATH, "//*[contains(@id, 'select2-dropdown_itilcategories_id')]")
             )
-        )
-    )
-    element.send_keys(config.request_category)
-    time.sleep(1)
-    element.send_keys(Keys.ENTER)
+        ).click()
 
-    WebDriverWait(driver, 99999).until(  # Wait list dissaper
-        EC.invisibility_of_element_located(
-            (By.CSS_SELECTOR, f"body > span > span > span.select2-results")
-        )
-    )
-
-    # City
-    WebDriverWait(driver, 99999).until(
-        EC.element_to_be_clickable(
-            (By.XPATH, "//*[contains(@id, 'select2-dropdown_locations_id')]")
-        )
-    ).click()
-
-    #     WebDriverWait(driver, 99999).until(  # Wait search
-    #         EC.invisibility_of_element_located(
-    #             (By.XPATH, f"//*[contains(text()='Searching...')]")
-    #         )
-    #     )
-
-    #     Message: invalid selector
-    # from javascript error: {"status":32,"value":"Unable to locate an element with the xpath expression //*[contains(text()='Searching...')] because of the following error:\nSyntaxError: Failed to execute 'evaluate' on 'Document': The string '//*[contains(text()='Searching...')]' is not a valid XPath expression."}
-    #   (Session info: chrome=131.0.6778.205)
-
-    element = WebDriverWait(driver, 99999).until(  # Closest input
-        EC.element_to_be_clickable(
-            (
-                By.CSS_SELECTOR,
-                "body > span > span > span.select2-search.select2-search--dropdown > input",
-            )
-        )
-    )
-    element.send_keys(config.city)
-    time.sleep(1)
-    element.send_keys(Keys.ENTER)
-
-    WebDriverWait(driver, 99999).until(  # Wait list dissaper
-        EC.invisibility_of_element_located(
-            (By.CSS_SELECTOR, f"body > span > span > span.select2-results")
-        )
-    )
-
-    element = WebDriverWait(driver, 99999).until(  # Closest "name_" is title
-        EC.element_to_be_clickable(
-            (
-                By.XPATH,
-                "//*[contains(@id, 'name_')]",
-            )
-        )
-    )
-    element.click()
-    element.send_keys(config.request_title)
-
-    # Text box iframe
-    iframe = driver.find_element(
-        By.XPATH,
-        "//iframe[@title='Área de texto rico']",
-    )
-    driver.switch_to.frame(iframe)
-
-    element = driver.find_element(
-        By.CSS_SELECTOR,
-        "#tinymce",
-    )
-    element.clear()
-
-    element.send_keys("1) Unidade : ")
-    element.send_keys(config.city)
-    element.send_keys(Keys.ENTER)
-    element.send_keys("2) Localidade (Nº da Sala / Setor / Home Office) : ")
-    element.send_keys(config.sala)
-    element.send_keys(Keys.ENTER)
-    element.send_keys("3) Andar : ")
-    element.send_keys(config.andar)
-    element.send_keys(Keys.ENTER)
-    element.send_keys("4) Telefone (Pessoal / Corporativo / Ramal) : ")
-    element.send_keys(config.telefone)
-    element.send_keys(Keys.ENTER)
-    element.send_keys("5) Patrimônio (Etiqueta branca) : ")
-    element.send_keys(config.request_patrimonio)
-    element.send_keys(Keys.ENTER)
-    element.send_keys("6) Descrição : ")
-    element.send_keys(config.request_problem)
-    element.send_keys(Keys.ENTER)
-
-    driver.switch_to.default_content()
-
-    if config.request_manual == 0:
-        if config.waitConfirmOpen == 0:
-            WebDriverWait(driver, 99999).until(  # button send ticket (in user form)
-                EC.presence_of_element_located(
-                    (
-                        By.NAME,
-                        f"add",
-                    )
+        element = WebDriverWait(driver, 99999).until(  # Closest input
+            EC.element_to_be_clickable(
+                (
+                    By.CSS_SELECTOR,
+                    "body > span > span > span.select2-search.select2-search--dropdown > input",
                 )
-            ).click()
-
-    time.sleep(99999)
-
-    # utils.waitPageBlockElement()
-
-    # IF FRAME
-    # # WebDriverWait(driver, 99999).until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, '//*[@id="questionario"]')))
-    driver.switch_to.frame("questionario")
-    field = driver.find_elements(
-        By.XPATH, '//*[@id="campoDyn_152"]'
-    )  # //*[@id="campoDyn_63"]
-    if field:
-        field[0].click(), field[0].send_keys(config.city + Keys.ENTER)
-    field = driver.find_elements(By.XPATH, '//*[@id="campoDyn_65"]')
-    if field:
-        field[0].click(), field[0].send_keys(config.sala)
-    field = driver.find_elements(By.XPATH, '//*[@id="campoDyn_66"]')
-    if field:
-        field[0].click(), field[0].send_keys(config.andar)
-    field = driver.find_elements(By.XPATH, '//*[@id="campoDyn_67"]')
-    if field:
-        field[0].click(), field[0].send_keys(config.request_patrimonio)
-    field = driver.find_elements(By.XPATH, '//*[@id="campoDyn_68"]')
-    if field:
-        field[0].click(), field[0].send_keys(config.request_problem)
-    driver.switch_to.default_content()
-
-    # IF NOT FRAME
-    element = driver.find_elements(
-        By.XPATH,
-        '//*[@id="tb_localidade.nome_localidade"]/div/select',
-    )
-    if element:
-        element[0].send_keys(config.city)
-
-    element = driver.find_elements(
-        By.XPATH,
-        '//*[@id="tb_localidade.Sala"]',
-    )
-    if element:
-        ActionChains(driver).move_to_element(element[0]).click(element[0]).send_keys(
-            config.sala
-        ).perform()
-
-    element = driver.find_elements(
-        By.XPATH,
-        '//*[@id="tb_localidade.Andar"]',
-    )
-    if element:
-        ActionChains(driver).move_to_element(element[0]).click(element[0]).send_keys(
-            config.andar
-        ).perform()
-
-    element = driver.find_elements(
-        By.XPATH,
-        '//*[@id="tb_localidade.Telefone"]',
-    )
-    if element:
-        ActionChains(driver).move_to_element(element[0]).click(element[0]).send_keys(
-            config.telefone
-        ).perform()
-
-    element = driver.find_elements(
-        By.XPATH,
-        '//*[@id="tb_localidade.Patrimonio"]',
-    )
-    if element:
-        ActionChains(driver).move_to_element(element[0]).click(element[0]).send_keys(
-            config.request_patrimonio
-        ).perform()
-
-    element = driver.find_elements(By.XPATH, '//*[@id="solicitacaoObservacao"]')
-    if element:
-        ActionChains(driver).move_to_element(element[0]).click(element[0]).send_keys(
-            config.request_problem
-        ).perform()
-
-    print("0")
-    if config.request_manual == 0:
-        print("1")
-        if config.waitConfirmOpen == 0:
-            print("2")
-            # confirm
-            field = WebDriverWait(driver, 99999).until(
-                EC.element_to_be_clickable((By.ID, "btn-add-servico-and-finish"))
             )
-
-            print("3")
-            field.click()
-
-    # get request number
-    try:
-        element = WebDriverWait(driver, 99999).until(
-            EC.visibility_of_element_located((By.CLASS_NAME, "panel-body"))
         )
-        print("painel com informações da abertura detectado")
+        element.send_keys(config.request_category)
+        time.sleep(1)
+        element.send_keys(Keys.ENTER)
+
+        WebDriverWait(driver, 99999).until(  # Wait list dissaper
+            EC.invisibility_of_element_located(
+                (By.CSS_SELECTOR, f"body > span > span > span.select2-results")
+            )
+        )
+
+        # -----
+
+        # ----- City -----
+        WebDriverWait(driver, 99999).until(
+            EC.element_to_be_clickable(
+                (By.XPATH, "//*[contains(@id, 'select2-dropdown_locations_id')]")
+            )
+        ).click()
+
+        element = WebDriverWait(driver, 99999).until(  # Closest input
+            EC.element_to_be_clickable(
+                (
+                    By.CSS_SELECTOR,
+                    "body > span > span > span.select2-search.select2-search--dropdown > input",
+                )
+            )
+        )
+        element.send_keys(config.city)
+        time.sleep(1)
+        element.send_keys(Keys.ENTER)
+
+        WebDriverWait(driver, 99999).until(  # Wait list dissaper
+            EC.invisibility_of_element_located(
+                (By.CSS_SELECTOR, f"body > span > span > span.select2-results")
+            )
+        )
+
+        # ----------
+
+        # ----- Title
+        element = WebDriverWait(driver, 99999).until(  # Closest "name_" is title
+            EC.element_to_be_clickable(
+                (
+                    By.XPATH,
+                    "//*[contains(@id, 'name_')]",
+                )
+            )
+        )
+        element.click()
+        element.send_keys(config.request_title)
+
+        # -----
+
+        # ----- Text box iframe -----
+        iframe = driver.find_element(
+            By.XPATH,
+            "//iframe[@title='Área de texto rico']",
+        )
+        driver.switch_to.frame(iframe)
+
+        element = driver.find_element(
+            By.CSS_SELECTOR,
+            "#tinymce",
+        )
+        element.clear()
+
+        element.send_keys("1) Unidade : ")
+        element.send_keys(config.city)
+        element.send_keys(Keys.ENTER)
+        element.send_keys("2) Localidade (Nº da Sala / Setor / Home Office) : ")
+        element.send_keys(config.sala)
+        element.send_keys(Keys.ENTER)
+        element.send_keys("3) Andar : ")
+        element.send_keys(config.andar)
+        element.send_keys(Keys.ENTER)
+        element.send_keys("4) Telefone (Pessoal / Corporativo / Ramal) : ")
+        element.send_keys(config.telefone)
+        element.send_keys(Keys.ENTER)
+        element.send_keys("5) Patrimônio (Etiqueta branca) : ")
+        element.send_keys(config.request_patrimonio)
+        element.send_keys(Keys.ENTER)
+        element.send_keys("6) Descrição : ")
+        element.send_keys(config.request_problem)
+        element.send_keys(Keys.ENTER)
+
+        driver.switch_to.default_content()
+        # ----------
+
+        if config.request_manual == 0:
+            if config.waitConfirmOpen == 0:
+                element = driver.find_element(
+                    By.XPATH, f"//span[contains(text()='Enviar')]"
+                ).click()
+
+        time.sleep(99999)
+
+    else:  # User ticket form
+
+        # ----- City -----
+        WebDriverWait(driver, 99999).until(
+            EC.element_to_be_clickable(
+                (
+                    By.XPATH,
+                    "//div[contains(@data-itemtype, 'PluginFormcreatorQuestion')][.//label[contains(text(), 'Unidade')]]//span[text()='-----']",
+                )
+            )
+        ).click()
+
+        element = WebDriverWait(driver, 99999).until(  # Closest input
+            EC.element_to_be_clickable(
+                (
+                    By.CSS_SELECTOR,
+                    "body > span > span > span.select2-search.select2-search--dropdown > input",
+                )
+            )
+        )
+        element.send_keys(config.city)
+        time.sleep(1)
+        element.send_keys(Keys.ENTER)
+
+        WebDriverWait(driver, 99999).until(  # Wait list dissaper
+            EC.invisibility_of_element_located(
+                (By.CSS_SELECTOR, f"body > span > span > span.select2-results")
+            )
+        )
+
+        # ----------
+
+        # ----- OPTIONAL: Programas -----
+        element = driver.find_elements(
+            By.XPATH,
+            "//div[contains(@data-itemtype, 'PluginFormcreatorQuestion')][.//label[contains(text(), 'Tipo de atendimento')]]//span[text()='-----']",
+        )
+        if element:
+            element[0].click()
+            time.sleep(1)
+
+            key_down = random.randint(0, 2)
+            print("key_down: ", key_down)
+            for i in range(key_down):
+                ActionChains(driver).send_keys(Keys.ARROW_DOWN).perform()
+            ActionChains(driver).send_keys(Keys.ENTER).perform()
+
+        element = driver.find_elements(
+            By.XPATH,
+            "//div[contains(@data-itemtype, 'PluginFormcreatorQuestion')][.//label[contains(text(), 'Programa')]]//span[text()='-----']",
+        )
+        if element:
+            element[0].click()
+            time.sleep(1)
+
+            key_down = random.randint(0, 13)
+            print("key_down: ", key_down)
+            for i in range(key_down):
+                ActionChains(driver).send_keys(Keys.ARROW_DOWN).perform()
+                print(f"Key_down: {i}")
+            ActionChains(driver).send_keys(Keys.ENTER).perform()
+
+        # ----------
+
+        # In Order: Local, Andar, Telefone & Patrimonio
+        element = driver.find_elements(
+            By.XPATH,
+            f"//input[contains(@class, 'form-control') and not(@name='globalsearch')]",  # @name='globalsearch' is for not input in search field (showed for admin)
+        )
+        element[0].send_keys(config.sala)
+        element[1].send_keys(config.andar)
+        element[2].send_keys(config.telefone)
+        element[3].send_keys(config.request_patrimonio)
+
+        # ----- Text box iframe -----
+        iframe = driver.find_element(
+            By.XPATH,
+            "//iframe[@title='Área de texto rico']",
+        )
+        driver.switch_to.frame(iframe)
+
+        element = driver.find_element(
+            By.CSS_SELECTOR,
+            "#tinymce",
+        )
+        element.clear()
+
+        element.send_keys(config.request_problem)
+        element.send_keys(Keys.ENTER)
+
+        driver.switch_to.default_content()
+        # ----------
+
+        if config.request_manual == 0:
+            if config.waitConfirmOpen == 0:
+                element = driver.find_element(
+                    By.XPATH, f"//span[contains(text()='Enviar')]"
+                ).click()
 
         element = WebDriverWait(driver, 99999).until(
             EC.presence_of_element_located(
                 (
-                    By.CSS_SELECTOR,
-                    "#solicitacoes-criadas-content > div > div > div > div > div > div:nth-child(1) > h2",
+                    By.XPATH,
+                    "//a[contains(@href, '/front/ticket.form.php?id=')]",
                 )
             )
         )
-        print("numero de chamado detectado")
-
-        element.get_attribute("outerText")
-        print(element.get_attribute("outerText"))
-        config.request_number = element.get_attribute("outerText")
-        print("Chamado nº" + config.request_number + " aberto")
-    except Exception as e:
-        print("Chamado não aberto")
-        print(f"Erro: {e}")
-        exit()
-
-    # time.sleep(99999)
+        print(f"Chamado {element.text} aberto")
+        time.sleep(1)
+        userLogout()
 
 
 def userLogout():

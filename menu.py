@@ -60,8 +60,6 @@ def openMenu():
             user.OpenRequest()
 
             user.login(1)
-            admin.adminFindRequestLoop()
-            admin.verifyRequestExist()
             admin.SelectRequestToClose()
             admin.requestClose()
 
@@ -80,14 +78,14 @@ def openMenu():
             admin.SelectRequestToClose()
             admin.requestClose()
 
-        case 4:
+        case 4:  # TO DO: close manual function
             utils.setManualMode(1)
             startBrowserUse()
             user.login(1)
             admin.SelectRequestToClose()
             admin.requestClose()
 
-        case 5:
+        case 5:  # TO DO: rate function
             utils.setManualMode(1)
             menu_select_user()
             startBrowserUse()

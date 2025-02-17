@@ -35,7 +35,7 @@ def loadCookie(cookieName):
         time.sleep(config.sleeptime)
 
         if cookieName == cookieAdminFile:
-            driver.get(config.page.get("admin"))
+            driver.get(config.page.get("adminRequestList"))
             cookie = pickle.load(open(pathCookie + cookieAdminFile, "rb"))
             for i in cookie:
                 driver.add_cookie(i)
