@@ -4,6 +4,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import re  # To extract number request
 
 import time
 import config
@@ -11,7 +12,9 @@ import utils
 import cookies
 import random
 import logintxt
-from driver import driver
+import driver as drv
+
+driver = drv.get_driver()
 
 
 def rateRequest():
@@ -111,6 +114,8 @@ def login(admin=0):
     cookies.saveCookie(config.userName)
     if config.saveLoginTxt == 1:
         logintxt.saveUserPass(config.userName)
+        if admin == 1:
+            logintxt.saveUserPass("ADMIN")
 
 
 def loadPresetUserInfo():
@@ -172,27 +177,30 @@ def loadPresetUserInfo():
         #     config.andar = 1
 
 
-def setPageRequest():
+def setPageRequest(form=0):
     time.sleep(config.sleeptime)
 
     if config.request_manual == 0:
 
-        print("config.request_link: ", config.request_link)
-        if not len(config.request_link):
+        if form == 0:
             driver.get(config.page.get("createRequestUserPanel"))
         else:
-            driver.get(config.request_link)
+            print("config.request_link: ", config.request_link)
+            if not len(config.request_link):
+                driver.get(config.page.get("createRequestUserPanel"))
+            else:
+                driver.get(config.request_link)
 
     # utils.waitPageLoadElementAppears()
     # time.sleep(config.sleeptime)
 
 
-def setRequestInfo(tec=0):
+def setRequestInfo(form=0):
 
     # In this moment, only tec=0 is called
     # There are 2 call forms, 1 for technicians and 1 for users
 
-    if tec == 1:
+    if form == 0:
         # ----- Category
         WebDriverWait(driver, 99999).until(
             EC.element_to_be_clickable(
@@ -296,25 +304,19 @@ def setRequestInfo(tec=0):
         driver.switch_to.default_content()
         # ----------
 
-        if config.request_manual == 0:
-            if config.waitConfirmOpen == 0:
-                element = driver.find_element(
-                    By.XPATH, f"//span[contains(text()='Enviar')]"
-                ).click()
-
-        time.sleep(99999)
-
     else:  # User ticket form
 
         # ----- City -----
-        WebDriverWait(driver, 99999).until(
-            EC.element_to_be_clickable(
+        element = WebDriverWait(driver, 99999).until(
+            EC.visibility_of_element_located(
                 (
                     By.XPATH,
                     "//div[contains(@data-itemtype, 'PluginFormcreatorQuestion')][.//label[contains(text(), 'Unidade')]]//span[text()='-----']",
                 )
             )
-        ).click()
+        )
+        ActionChains(driver).move_to_element(element).perform()
+        element.click()
 
         element = WebDriverWait(driver, 99999).until(  # Closest input
             EC.element_to_be_clickable(
@@ -366,17 +368,92 @@ def setRequestInfo(tec=0):
                 print(f"Key_down: {i}")
             ActionChains(driver).send_keys(Keys.ENTER).perform()
 
-        # ----------
-
-        # In Order: Local, Andar, Telefone & Patrimonio
+        # OPTIONAL: Create user
         element = driver.find_elements(
             By.XPATH,
-            f"//input[contains(@class, 'form-control') and not(@name='globalsearch')]",  # @name='globalsearch' is for not input in search field (showed for admin)
+            "//div[contains(@class, 'grid-stack-item-content')][.//label[contains(text(), 'E-mail')]]//input[@type='text']",
         )
-        element[0].send_keys(config.sala)
-        element[1].send_keys(config.andar)
-        element[2].send_keys(config.telefone)
-        element[3].send_keys(config.request_patrimonio)
+        if element:
+            element[0].send_keys("rh.ms@dpu.def.br")
+            time.sleep(1)
+
+        element = driver.find_elements(
+            By.XPATH,
+            "//div[contains(@class, 'grid-stack-item-content')][.//label[contains(text(), 'O novo usuário é um estagiário?')]]//span[text()='-----']",
+        )
+        if element:
+            element[0].click()
+            ActionChains(driver).send_keys(Keys.ARROW_DOWN).perform()
+            ActionChains(driver).send_keys(Keys.ENTER).perform()
+            time.sleep(1)
+
+        element = driver.find_elements(
+            By.XPATH,
+            "//div[contains(@class, 'grid-stack-item-content')][.//label[contains(text(), 'Será necessário acesso a pastas de rede?')]]//span[text()='-----']",
+        )
+        if element:
+            element[0].click()
+            ActionChains(driver).send_keys(Keys.ARROW_DOWN).perform()
+            ActionChains(driver).send_keys(Keys.ENTER).perform()
+            time.sleep(1)
+
+        element = driver.find_elements(
+            By.XPATH,
+            "//div[contains(@class, 'grid-stack-item-content')][.//label[contains(text(), 'Nome e caminho da pasta')]]//input[@type='text']",
+        )
+        if element:
+            element[0].send_keys(f"\\\CPE-ARQ-PVW02\DPUCPE")
+
+        element = driver.find_elements(
+            By.XPATH,
+            "//div[contains(@class, 'grid-stack-item-content')][.//label[contains(text(), 'Será necessário a criação de e-mail institucional?')]]//span[text()='Sim']",
+        )
+        if element:
+            element[0].click()
+            ActionChains(driver).send_keys(Keys.ARROW_DOWN).perform()
+            ActionChains(driver).send_keys(Keys.ENTER).perform()
+            time.sleep(1)
+
+        # ----------
+
+        # # In Order: Local, Andar, Telefone & Patrimonio
+        # element = driver.find_elements(
+        #     By.XPATH,
+        #     f"//input[contains(@class, 'form-control') and not(@name='globalsearch')]",  # @name='globalsearch' is for not input in search field (showed for admin)
+        # )
+        # print(f"input fields: {len(element)}")
+        # element[0].send_keys(config.sala)
+        # element[1].send_keys(config.andar)
+        # element[2].send_keys(config.telefone)
+        # element[3].send_keys(config.request_patrimonio)
+
+        element = driver.find_elements(
+            By.XPATH,
+            "//div[contains(@class, 'grid-stack-item-content')][.//label[contains(text(), 'Localidade')]]//input[@type='text']",
+        )
+        if element:
+            element[0].send_keys(config.sala)
+
+        element = driver.find_elements(
+            By.XPATH,
+            "//div[contains(@class, 'grid-stack-item-content')][.//label[contains(text(), 'Andar')]]//input[@type='text']",
+        )
+        if element:
+            element[0].send_keys(config.andar)
+
+        element = driver.find_elements(
+            By.XPATH,
+            "//div[contains(@class, 'grid-stack-item-content')][.//label[contains(text(), 'Telefone')]]//input[@type='text']",
+        )
+        if element:
+            element[0].send_keys(config.telefone)
+
+        element = driver.find_elements(
+            By.XPATH,
+            "//div[contains(@class, 'grid-stack-item-content')][.//label[contains(text(), 'Patrimônio')]]//input[@type='text']",
+        )
+        if element:
+            element[0].send_keys(config.request_patrimonio)
 
         # ----- Text box iframe -----
         iframe = driver.find_element(
@@ -397,23 +474,33 @@ def setRequestInfo(tec=0):
         driver.switch_to.default_content()
         # ----------
 
-        if config.request_manual == 0:
-            if config.waitConfirmOpen == 0:
-                element = driver.find_element(
-                    By.XPATH, f"//span[contains(text()='Enviar')]"
-                ).click()
+    if config.request_manual == 0:
+        if config.waitConfirmOpen == 0:
+            element = driver.find_element(
+                By.XPATH, f"//span[contains(text(), 'Enviar')]"
+            ).click()
 
-        element = WebDriverWait(driver, 99999).until(
-            EC.presence_of_element_located(
-                (
-                    By.XPATH,
-                    "//a[contains(@href, '/front/ticket.form.php?id=')]",
-                )
+    WebDriverWait(driver, 99999).until(
+        EC.invisibility_of_element((By.XPATH, f"//span[contains(text(), 'Enviar')]"))
+    )
+    element = WebDriverWait(driver, 99999).until(
+        EC.presence_of_element_located(
+            (
+                By.XPATH,
+                "//div[@class='toast-body']//a[contains(@href, '/front/ticket.form.php?id=')]",
             )
         )
-        print(f"Chamado {element.text} aberto")
-        time.sleep(1)
-        userLogout()
+    )
+    text = element.get_property("href")
+    print(text)
+    numberTicket = re.search(r"id=(\d+)", text).group(
+        1
+    )  # Example: Extract "479" from "?id=479&forcetab=Ticket$2"
+    config.request_number = int(numberTicket)
+    print(config.request_number)
+    print(f"Chamado {numberTicket} aberto")
+    time.sleep(5)
+    userLogout()
 
 
 def userLogout():

@@ -2,7 +2,9 @@ import pickle
 import time
 
 import config
-from driver import driver
+import driver as drv
+
+driver = drv.get_driver()
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys

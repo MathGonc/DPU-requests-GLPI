@@ -10,7 +10,9 @@ import time
 import config
 import cookies
 import user
-from driver import driver
+import driver as drv
+
+driver = drv.get_driver()
 
 
 def setManualMode(mode):

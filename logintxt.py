@@ -6,7 +6,9 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 import config
-from driver import driver
+import driver as drv
+
+driver = drv.get_driver()
 import time
 import user
 

@@ -7,13 +7,21 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 
+
+import tkinter as tk
+from tkinter import simpledialog
+
 import config
 import user
 import admin
 import cookies
 import utils
 import logintxt
-from driver import driver, chrome_options
+
+
+import driver
+
+driver = driver.get_driver()
 
 
 def startBrowserUse():
@@ -24,29 +32,16 @@ def startBrowserUse():
         reopenBrowser()
 
 
-def reopenBrowser():
-    driver = webdriver.Chrome(
-        executable_path="chromedriver", chrome_options=chrome_options
-    )
-    driver.maximize_window()
+# def reopenBrowser():
+#     driver = webdriver.Chrome(
+#         executable_path="chromedriver", chrome_options=chrome_options
+#     )
+#     driver.maximize_window()
 
 
-def openMenu():
-    if config.defaultOption == 0:
-        inputValue = input(
-            "\nSelect an option\n"
-            + "0 - Visualizar chamados (admin)\n"
-            + "1 - Abrir & Fechar\n"
-            + "2 - Abrir\n"
-            + "3 - Fechar (automatico)\n"
-            + "4 - Fechar (manual)\n"
-            + "5 - Avaliar\n"
-            + "6 - Fechar\n"
-        )
-    else:
-        inputValue = config.defaultOption
+def selectMenuOptions(option):
 
-    match (int(inputValue)):
+    match (int(option)):
         case 0:
             utils.setManualMode(0)
             startBrowserUse()
@@ -56,6 +51,7 @@ def openMenu():
             menu_select_user()
             menuSelectTypeRequest()
 
+            utils.setManualMode(0)
             startBrowserUse()
             user.OpenRequest()
 
@@ -67,6 +63,7 @@ def openMenu():
             menu_select_user()
             menuSelectTypeRequest()
 
+            utils.setManualMode(0)
             startBrowserUse()
             user.OpenRequest()
             driver.close()  # Não usar na função de abrir e fechar
@@ -112,7 +109,7 @@ def menu_select_user():
                 count += 1
 
     if config.defaultUser == 0:
-        inputValue = input(requestList)
+        inputValue = simpledialog.askstring("Options", requestList)
     else:
         inputValue = config.defaultUser
 
@@ -151,7 +148,7 @@ def menuSelectTypeRequest():
             count += 1
 
     if config.defaultRequest == 0:
-        inputValue = input(requestList)
+        inputValue = simpledialog.askstring("Options", requestList)
         inputValue = int(inputValue)
     else:
         inputValue = config.defaultRequest
@@ -173,8 +170,8 @@ def menuSelectTypeRequest():
 
         if len(config.request_patrimonio) <= 1:
             if config.defaultPatrimonio == 0:
-                config.request_patrimonio = input(
-                    "Este tipo de chamado exige um patrimonio: "
+                config.request_patrimonio = simpledialog.askstring(
+                    "Este tipo de chamado exige um patrimonio: ", ""
                 )
             else:
                 config.request_patrimonio = config.defaultPatrimonio
@@ -186,7 +183,9 @@ def menuSelectTypeRequest():
 
 def menuReset():
     driver.quit()
-    inputValue = input("\nSelect an option\n" + "1 - Repetir\n" + "2 - Fechar\n")
+    inputValue = simpledialog.askstring(
+        "", "\nSelect an option\n" + "1 - Repetir\n" + "2 - Fechar\n"
+    )
     if int(inputValue) == 1:
         openMenu()
     else:

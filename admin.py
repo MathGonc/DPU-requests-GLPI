@@ -18,7 +18,9 @@ import menu
 import cookies
 import utils
 import user
-from driver import driver
+import driver as drv
+
+driver = drv.get_driver()
 
 xpathSolution = "/html/body/div[3]/div/div[2]/div/div[1]/div/form/div/div/div/div/div/div[2]/div/div/div[3]/div[2]/div[6]/div/fieldset/div[4]/div[2]/div/div/citsmart-trix-editor/div/trix-editor"
 xpathNameUser = '//*[@id="service-request-view"]/div/div/div/div[2]/div/div/div[3]/div[1]/div[1]/div/fieldset/div[1]/div[1]/div/div[2]'
@@ -101,16 +103,22 @@ def SelectRequestToClose():
     #     )
 
     if config.request_manual == 0:
-        print("Procurando chamados...")
-        # *** TO DO: Insert loop
-        element = WebDriverWait(driver, 99999).until(
-            EC.presence_of_element_located(
-                (
-                    By.XPATH,
-                    "//*[contains(@href, '/front/ticket.form.php?id=')]",
-                )
+
+        while True:
+            print("Searching ticket...")
+            element = driver.find_elements(
+                By.XPATH, "//*[contains(@href, '/front/ticket.form.php?id=')]"
             )
-        )
+            if element:
+                break
+            else:
+                print("Ticket not found, searching again...")
+                time.sleep(60)
+                searchElement = driver.find_element(
+                    By.XPATH,
+                    "//button[contains(@type, 'submit')]//span[text()='Pesquisar']",
+                )
+                searchElement.click()
 
         elementRequests = driver.find_elements(
             By.XPATH,
@@ -204,14 +212,18 @@ def setStatus():
 
 
 def setLocation():
-    element = WebDriverWait(driver, 99999).until(
-        EC.element_to_be_clickable(
-            (
-                By.CSS_SELECTOR,
-                "#item-main > div > div:nth-child(8) > div > div > span.select2.select2-container.select2-container--default > span.selection > span",
+    try:
+        element = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable(
+                (
+                    By.XPATH,
+                    "//div[contains(@class, 'form-field')][.//label[contains(text(), 'Localização')]]//span[text()='-----']",
+                )
             )
         )
-    )
+    except:
+        return
+
     element.click()
     actions = ActionChains(driver)
     actions.send_keys(config.city).perform()
@@ -233,13 +245,27 @@ def setTextSolution():
     element = WebDriverWait(driver, 99999).until(
         EC.presence_of_element_located(
             (
-                By.CSS_SELECTOR,
-                "#actors > div > div:nth-child(1) > div > span > span.selection > span > ul > li.select2-selection__choice > span.actor_entry > span.actor_text",
+                By.XPATH,
+                "//a[contains(@href, '/front/user.form.php?id=')]",
             )
         )
     )
-    nameUser = element.get_property("innerHTML")
+
+    element = driver.find_elements(
+        By.XPATH, "//a[contains(@href, '/front/user.form.php?id=')]"
+    )
+    nameUser = ""
+    if element:
+        nameUser = element[1].get_property("outerText")
+        print(f"element[1] outerText:  {element[1].get_property('outerText')}")
+    else:
+        print(
+            "ELEMENT NAMEUSER ERRORRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR"
+        )
+        return setTextSolution()
+
     print(f"nameUser: {nameUser}")
+    # TO FIX: As vezes o nome vem vazio
 
     # Solution
     WebDriverWait(driver, 99999).until(
@@ -276,6 +302,7 @@ def setTextSolution():
         case 0:
             nameUser = nameUser
         case 1:
+            print(nameUser.split()[0])
             nameUser = nameUser.split()[0]
         case 2:
             if (
@@ -580,11 +607,6 @@ def SetKnowledges(auto):
 
 
 def requestClose():
-    # time.sleep(config.sleeptime)
-    # if utils.verifyPageErrorExist() == True:
-    #     return requestClose()
-    # utils.waitPageBlockElement()
-    # time.sleep(config.sleeptime)
 
     if config.request_manual == 1:  # Get request number to link in manual mode
         WebDriverWait(driver, 99999).until(
@@ -629,20 +651,42 @@ def requestClose():
     # setStatus() # Dont need set solution, because button add solution already set this status
     SetKnowledges(1)
     setLocation()
+
+    # Atribuir a mim
+    element = driver.find_elements(
+        By.CSS_SELECTOR,
+        "#actors > div > div:nth-child(3) > div > button > i",
+    )
+    if element:
+        print("Aguardando o botão 'i' de atribuir estar disponivel")
+        WebDriverWait(driver, 99999).until(
+            EC.element_to_be_clickable(
+                (
+                    By.CSS_SELECTOR,
+                    "#actors > div > div:nth-child(3) > div > button > i",
+                )
+            )
+        ).click()
+        # ActionChains(driver).move_to_element(element[0]).perform()
+        # element[0].click()
+
     setTextSolution()
 
     print("config.request_manual: ", config.request_manual)
     print("config.waitConfirmClose: ", config.waitConfirmClose)
-    if config.request_manual == 1:  # TEMP
-        if config.waitConfirmClose == 1:  # TEMP
+    if config.request_manual == 0:  # TEMP
+        if config.waitConfirmClose == 0:  # TEMP
             WebDriverWait(driver, 99999).until(  # FIX ITTTTT
-                EC.element_to_be_clickable(
+                EC.presence_of_element_located(
                     (
                         By.XPATH,
-                        "//button[@name='add']",
+                        "//button[@type='submit']//span[text()='Adicionar']",
                     )
                 )
-            ).click()
+            )
+            ActionChains(driver).key_down(Keys.LEFT_CONTROL).key_down(
+                Keys.ENTER
+            ).key_up(Keys.LEFT_CONTROL).key_up(Keys.ENTER).perform()
 
             WebDriverWait(driver, 99999).until(
                 EC.presence_of_element_located(
@@ -653,6 +697,8 @@ def requestClose():
                 )
             )
 
+            print("2222222222")
+
             # Click in status box
             WebDriverWait(driver, 99999).until(
                 EC.element_to_be_clickable(
@@ -662,6 +708,8 @@ def requestClose():
                     )
                 )
             ).click()
+
+            print("333333333333333")
 
             time.sleep(1)
 
@@ -675,6 +723,8 @@ def requestClose():
                 )
             ).click()
 
+            print("4444444444444")
+
             WebDriverWait(driver, 99999).until(
                 EC.element_to_be_clickable(
                     (
@@ -684,6 +734,8 @@ def requestClose():
                 )
             ).click()
 
+            print("5555555555555")
+
             WebDriverWait(driver, 99999).until(
                 EC.presence_of_element_located(
                     (
@@ -692,6 +744,8 @@ def requestClose():
                     )
                 )
             )
+
+            print("666666666666666")
 
     print("Chamado nº " + config.request_number + " fechado")
     time.sleep(99999)
