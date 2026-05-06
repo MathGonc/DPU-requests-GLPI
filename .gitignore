@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
-.vscode/
-users/
-.pkl
+.vscode
+users/*.pkl
+users/pass
+chromedriver-win64
