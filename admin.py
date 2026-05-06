@@ -657,6 +657,7 @@ def requestClose():
         By.CSS_SELECTOR,
         "#actors > div > div:nth-child(3) > div > button > i",
     )
+    # driver.execute_script("arguments[0].scrollIntoView(true);", element)
     if element:
         print("Aguardando o botão 'i' de atribuir estar disponivel")
         WebDriverWait(driver, 99999).until(

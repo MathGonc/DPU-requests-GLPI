@@ -32,11 +32,21 @@ def startBrowserUse():
         reopenBrowser()
 
 
-# def reopenBrowser():
-#     driver = webdriver.Chrome(
-#         executable_path="chromedriver", chrome_options=chrome_options
-#     )
-#     driver.maximize_window()
+def reopenBrowser():
+    driver = webdriver.Chrome(
+        executable_path="chromedriver", chrome_options=chrome_options
+    )
+    driver.maximize_window()
+
+
+"""
+1) Unidade : Campo Grande
+2) Localidade (Nº da Sala / Setor / Home Office) : TI
+3) Andar : 01
+4) Telefone (Pessoal / Corporativo / Ramal) : 67993475962
+5) Patrimônio (Etiqueta branca) : 052973
+6) Descrição : 
+"""
 
 
 def selectMenuOptions(option):
@@ -53,7 +63,7 @@ def selectMenuOptions(option):
 
             utils.setManualMode(0)
             startBrowserUse()
-            user.OpenRequest()
+            user.OpenRequest(form=1)
 
             user.login(1)
             admin.SelectRequestToClose()
@@ -65,7 +75,7 @@ def selectMenuOptions(option):
 
             utils.setManualMode(0)
             startBrowserUse()
-            user.OpenRequest()
+            user.OpenRequest(form=1)
             driver.close()  # Não usar na função de abrir e fechar
 
         case 3:

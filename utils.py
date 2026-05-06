@@ -129,3 +129,27 @@ def detectErrorInLogin():
             driver.refresh()
             detectErrorInLogin()
         return 0
+
+
+def search_label_list_and_input(label, insert):
+    element = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located(
+            (
+                By.XPATH,
+                f"//label[contains(., '{label}')]/following::span[1]",
+            )
+        )
+    )
+    ActionChains(driver).move_to_element(element).perform()
+    element.click()
+    element = WebDriverWait(driver, 999).until(
+        EC.presence_of_element_located((By.XPATH, f"//li[contains(., '{insert}')]"))
+    )
+    time.sleep(1)
+    actions = ActionChains(driver)
+    actions.send_keys(insert)
+    actions.perform()
+    time.sleep(1)
+    actions.send_keys(Keys.ENTER)
+    actions.perform()
+    return element

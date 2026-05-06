@@ -18,6 +18,15 @@ def get_driver():
         chrome_options.add_argument("--force-device-scale-factor=0.5")
         # chrome_options.binary_location = r"./chrome-win64/chrome.exe"
 
+        prefs = {
+            "profile.default_content_setting_values.local_network_access": 2,
+            "profile.managed_default_content_settings.local_network_access": 2,
+        }
+        chrome_options.add_experimental_option("prefs", prefs)
+
+        # Opcional: Adicionar para evitar outros prompts de UI
+        chrome_options.add_argument("--deny-permission-prompts")
+
         # ChromeDriver FIXO (sem update automático)
         service = Service(r"./chromedriver-win64/chromedriver.exe")
 
